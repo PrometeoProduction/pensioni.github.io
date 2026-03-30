@@ -765,10 +765,15 @@ function updateTrend() {
     });
   }
 
+  // Only include quarter-year combos that actually exist in the dataset (non-zero)
+  const validCombos = new Set(DATA.trend.filter(r => r.Numero_pensioni > 0).map(r => `${r.Trimestrale}_${r.Anno_decorrenza}`));
+
   const points = [];
   anni.forEach(a => quarterOrder.forEach(q => {
     if (state.anno !== 'all' && a != state.anno) return;
-    points.push({ label: `${q.split(' ')[0]} ${a}`, v: pointsMap[`${q}_${a}`] || 0 });
+    const key = `${q}_${a}`;
+    if (!validCombos.has(key)) return; // skip quarters with no real data
+    points.push({ label: `${q.split(' ')[0]} ${a}`, v: pointsMap[key] || 0 });
   }));
 
   makeChart('chart-trend', 'line', {
