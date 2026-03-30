@@ -360,6 +360,16 @@
     header h1 { font-size: 1.5rem; }
     .header-badge { display: none; }
   }
+
+  .sm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin:.5rem 0;}
+  .sm-card2{background:rgba(255,255,255,.03);border:1px solid var(--border);padding:1rem 1.1rem;}
+  .sm-cat2{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem;}
+  .sm-tot2{font-family:'Libre Baskerville',serif;font-size:1.3rem;font-weight:700;margin-bottom:.3rem;}
+  .sm-bw2{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin:.35rem 0;}
+  .sm-bm2{height:100%;background:var(--blue);float:left;transition:width .5s;}
+  .sm-bf2{height:100%;background:var(--rose);float:left;transition:width .5s;}
+  .sm-leg2{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:.67rem;color:var(--text-dim);clear:both;margin-top:.3rem;}
+
 </style>
 </head>
 <body>
@@ -412,7 +422,7 @@
       <div class="kpi-sub">nel periodo selezionato</div>
     </div>
     <div class="kpi">
-      <div class="kpi-label">Anno con più pensioni</div>
+      <div class="kpi-label" id="kpi2-label">Anno con più pensioni</div>
       <div class="kpi-value" id="kpi-top-year">—</div>
       <div class="kpi-sub" id="kpi-top-year-sub">—</div>
     </div>
@@ -502,7 +512,8 @@
   <div class="card" style="margin-bottom:1.2rem;">
     <div class="card-title">Pensioni per categoria e genere</div>
     <div class="card-subtitle">Confronto Maschi vs. Femmine per tipo di pensione</div>
-    <canvas id="chart-sesso-cat" height="100"></canvas>
+    <div id="small-multiples-sm" style="margin-top:.8rem"></div>
+    <canvas id="chart-sesso-cat" style="display:none" height="100"></canvas>
   </div>
 
   <!-- TABELLA REGIONI -->
@@ -526,7 +537,86 @@
     </div>
     <div class="annotation">* I valori riflettono i filtri correntemente selezionati · fonte: INPS Open Data · Dataset 6002</div>
   </div>
+
+  <div class="section-divider" style="margin-top:2.5rem"><span>Analisi · Divergenza territoriale &amp; contesto inflazione</span></div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.2rem">
+    <div class="kpi-card" style="background:var(--card);border:1px solid var(--border);border-top:2px solid var(--rose);padding:1.4rem 1.6rem;position:relative;overflow:hidden">
+      <div class="kpi-label">Gap basso reddito 2022</div>
+      <div style="font-family:'Libre Baskerville',serif;font-size:2rem;font-weight:700;color:var(--rose)">+16 pp</div>
+      <div style="font-family:'DM Mono',monospace;font-size:.7rem;color:var(--text-dim);margin-top:.4rem">66% pensioni &lt;1000€ al Sud vs 50% al Nord · anno peggiore per le famiglie vulnerabili</div>
+    </div>
+    <div class="kpi-card" style="background:var(--card);border:1px solid var(--border);border-top:2px solid var(--teal);padding:1.4rem 1.6rem;position:relative;overflow:hidden">
+      <div class="kpi-label">Inflazione Sud+Isole 2022</div>
+      <div style="font-family:'Libre Baskerville',serif;font-size:2rem;font-weight:700;color:var(--teal)">+9.2%</div>
+      <div style="font-family:'DM Mono',monospace;font-size:.7rem;color:var(--text-dim);margin-top:.4rem">vs +7.8% Nord-Ovest · fonte ISTAT NIC · il più alto tra le macroaree</div>
+    </div>
+    <div class="kpi-card" style="background:var(--card);border:1px solid var(--border);border-top:2px solid var(--gold);padding:1.4rem 1.6rem;position:relative;overflow:hidden">
+      <div class="kpi-label">Donne fascia 500-999€ 2023</div>
+      <div style="font-family:'Libre Baskerville',serif;font-size:2rem;font-weight:700">40.9%</div>
+      <div style="font-family:'DM Mono',monospace;font-size:.7rem;color:var(--text-dim);margin-top:.4rem">vs 28% uomini · divario di genere cresciuto di +2.8 pp in 4 anni</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem">
+    <div class="card">
+      <div class="card-title">Pensioni &lt;1000€ per area — divergenza Nord/Sud</div>
+      <div class="card-subtitle">% su totale liquidate · 2020–2023 · il Sud e Isole picca a 66% nel 2022</div>
+      <canvas id="chart-divergenza" height="190"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Inflazione NIC 2022 vs quota basso reddito</div>
+      <div class="card-subtitle">Fonte: ISTAT NIC media annua per ripartizione · doppia asse · le due curve si sovrappongono</div>
+      <canvas id="chart-inflazione" height="190"></canvas>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1.2rem">
+    <div class="card-title">Composizione per fascia di importo — Nord Ovest vs Sud e Isole (2020–2023)</div>
+    <div class="card-subtitle">Il Sud mostra una migrazione strutturale verso 500-999€ (+9 pp) · il Nord è sostanzialmente stabile</div>
+    <canvas id="chart-confronto-aree" height="150"></canvas>
+  </div>
+
+  <div class="card" style="margin-bottom:1.2rem;border-left:3px solid var(--gold)">
+    <div class="card-title" style="margin-bottom:.8rem">Cosa dice la letteratura · ISTAT e gap di ricerca</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;font-size:.82rem;color:var(--text-dim);line-height:1.75">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.5rem">Inflazione temporale NIC · 2020–2024</div>
+        <p>Il ciclo inflattivo 2020–2024 ha colpito in modo asimmetrico per area. <strong style="color:var(--text)">2020</strong>: deflazione −0.2% (shock pandemia + crollo energia). <strong style="color:var(--text)">2022</strong>: picco storico +8.1% nazionale, con le Isole a <strong style="color:var(--rose)">+9.7%</strong> e il Nord-Ovest "solo" a +7.8%. <strong style="color:var(--text)">2023</strong>: freno a +5.7%, ma con Nord-Ovest a +5.9% (inversione di tendenza rispetto al 2022). <strong style="color:var(--text)">2024</strong>: normalizzazione a +1.0% su tutte le macroaree.</p>
+      </div>
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.5rem">ISTAT Parità Regionali Potere d'Acquisto</div>
+        <p>ISTAT ha lanciato nel 2023 un <strong style="color:var(--text)">progetto sperimentale</strong> sugli Indici Spaziali dei Prezzi al Consumo (PPP regionali), al momento limitato a 5 divisioni di spesa (alimentari, bevande, abbigliamento, arredamento, ristorazione). I risultati 2021–2022 mostrano che il <em>Nord è più costoso per il cibo</em>, mentre il <em>Sud/Isole è più caro per alloggio-turismo</em>. <strong style="color:var(--gold)">Nessuna pubblicazione ha incrociato questi indici con i dati INPS sulle pensioni</strong> — si tratta di un research gap esplicito. Un tale studio richiederebbe accesso ai microdati amministrativi, disponibili solo tramite convenzione con ISTAT.</p>
+      </div>
+    </div>
+  </div>
+
 </main>
+
+
+  <div style="border-top:1px solid var(--border);padding:1.5rem 3rem 0;max-width:1600px;margin:0 auto;">
+    <div style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.9rem">Fonti dei dati</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem 2.5rem;font-size:.75rem;color:var(--text-dim);line-height:1.7;padding-bottom:1.5rem;border-bottom:1px dashed var(--border)">
+      <div>
+        <div style="color:var(--gold);font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Pensioni INPS</div>
+        <p><strong style="color:var(--text)">INPS Open Data · Dataset 6002</strong><br>
+        Nuove pensioni liquidate per anno, categoria, regione, importo, età e gestione. Anni 2020–2024 (2024 solo I trimestre).<br>
+        <a href="https://www.inps.it/dati-ricerche-e-bilanci/open-data" target="_blank" style="color:var(--gold);text-decoration:none">inps.it/open-data</a></p>
+      </div>
+      <div>
+        <div style="color:var(--gold);font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Inflazione per ripartizione</div>
+        <p><strong style="color:var(--text)">ISTAT · Prezzi al consumo NIC</strong><br>
+        Variazioni medie annue dell'indice NIC per regione e ripartizione geografica. Anni 2020–2024. Report definitivi dicembre di ogni anno.<br>
+        <a href="https://www.istat.it/statistiche-per-temi/economia/prezzi/" target="_blank" style="color:var(--gold);text-decoration:none">istat.it/prezzi</a></p>
+      </div>
+      <div>
+        <div style="color:var(--gold);font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem">Costo della vita regionale</div>
+        <p><strong style="color:var(--text)">ISTAT · Indici Spaziali dei Prezzi (sperimentale)</strong><br>
+        Parità regionali del potere d'acquisto per 5 divisioni di spesa. Anni 2021–2022. Progetto sperimentale, copertura parziale del paniere.<br>
+        <a href="https://www.istat.it/statistica-sperimentale/indici-spaziali-dei-prezzi-al-consumo-anno-2022/" target="_blank" style="color:var(--gold);text-decoration:none">istat.it/indici-spaziali</a></p>
+      </div>
+    </div>
+  </div>
 
 <footer>
   <span>Fonte: INPS Open Data · Dataset 6002 · Nuove pensioni liquidate 2020–2024</span>
@@ -534,7 +624,7 @@
 </footer>
 
 <script>
-const DATA = {"trend": [{"Anno_decorrenza": 2020, "Trimestrale": "I trimestre", "Numero_pensioni": 228427.0}, {"Anno_decorrenza": 2020, "Trimestrale": "II trimestre", "Numero_pensioni": 203948.0}, {"Anno_decorrenza": 2020, "Trimestrale": "III trimestre", "Numero_pensioni": 235791.0}, {"Anno_decorrenza": 2020, "Trimestrale": "IV trimestre", "Numero_pensioni": 221135.0}, {"Anno_decorrenza": 2021, "Trimestrale": "I trimestre", "Numero_pensioni": 233357.0}, {"Anno_decorrenza": 2021, "Trimestrale": "II trimestre", "Numero_pensioni": 217163.0}, {"Anno_decorrenza": 2021, "Trimestrale": "III trimestre", "Numero_pensioni": 243255.0}, {"Anno_decorrenza": 2021, "Trimestrale": "IV trimestre", "Numero_pensioni": 215526.0}, {"Anno_decorrenza": 2022, "Trimestrale": "I trimestre", "Numero_pensioni": 243224.0}, {"Anno_decorrenza": 2022, "Trimestrale": "II trimestre", "Numero_pensioni": 209701.0}, {"Anno_decorrenza": 2022, "Trimestrale": "III trimestre", "Numero_pensioni": 223853.0}, {"Anno_decorrenza": 2022, "Trimestrale": "IV trimestre", "Numero_pensioni": 199024.0}, {"Anno_decorrenza": 2023, "Trimestrale": "I trimestre", "Numero_pensioni": 223301.0}, {"Anno_decorrenza": 2023, "Trimestrale": "II trimestre", "Numero_pensioni": 198894.0}, {"Anno_decorrenza": 2023, "Trimestrale": "III trimestre", "Numero_pensioni": 211084.0}, {"Anno_decorrenza": 2023, "Trimestrale": "IV trimestre", "Numero_pensioni": 185957.0}, {"Anno_decorrenza": 2024, "Trimestrale": "I trimestre", "Numero_pensioni": 187223.0}], "regione": [{"Regione": "Abruzzo", "Anno_decorrenza": 2020, "Numero_pensioni": 20499.0}, {"Regione": "Abruzzo", "Anno_decorrenza": 2021, "Numero_pensioni": 20698.0}, {"Regione": "Abruzzo", "Anno_decorrenza": 2022, "Numero_pensioni": 19538.0}, {"Regione": "Abruzzo", "Anno_decorrenza": 2023, "Numero_pensioni": 17861.0}, {"Regione": "Abruzzo", "Anno_decorrenza": 2024, "Numero_pensioni": 4053.0}, {"Regione": "Basilicata", "Anno_decorrenza": 2020, "Numero_pensioni": 8791.0}, {"Regione": "Basilicata", "Anno_decorrenza": 2021, "Numero_pensioni": 9030.0}, {"Regione": "Basilicata", "Anno_decorrenza": 2022, "Numero_pensioni": 8967.0}, {"Regione": "Basilicata", "Anno_decorrenza": 2023, "Numero_pensioni": 8224.0}, {"Regione": "Basilicata", "Anno_decorrenza": 2024, "Numero_pensioni": 1790.0}, {"Regione": "Calabria", "Anno_decorrenza": 2020, "Numero_pensioni": 31078.0}, {"Regione": "Calabria", "Anno_decorrenza": 2021, "Numero_pensioni": 31329.0}, {"Regione": "Calabria", "Anno_decorrenza": 2022, "Numero_pensioni": 29849.0}, {"Regione": "Calabria", "Anno_decorrenza": 2023, "Numero_pensioni": 27043.0}, {"Regione": "Calabria", "Anno_decorrenza": 2024, "Numero_pensioni": 5926.0}, {"Regione": "Campania", "Anno_decorrenza": 2020, "Numero_pensioni": 72312.0}, {"Regione": "Campania", "Anno_decorrenza": 2021, "Numero_pensioni": 75275.0}, {"Regione": "Campania", "Anno_decorrenza": 2022, "Numero_pensioni": 72356.0}, {"Regione": "Campania", "Anno_decorrenza": 2023, "Numero_pensioni": 66515.0}, {"Regione": "Campania", "Anno_decorrenza": 2024, "Numero_pensioni": 14305.0}, {"Regione": "Emilia Romagna", "Anno_decorrenza": 2020, "Numero_pensioni": 71748.0}, {"Regione": "Emilia Romagna", "Anno_decorrenza": 2021, "Numero_pensioni": 72909.0}, {"Regione": "Emilia Romagna", "Anno_decorrenza": 2022, "Numero_pensioni": 70502.0}, {"Regione": "Emilia Romagna", "Anno_decorrenza": 2023, "Numero_pensioni": 67334.0}, {"Regione": "Emilia Romagna", "Anno_decorrenza": 2024, "Numero_pensioni": 15123.0}, {"Regione": "Friuli Venezia Giulia", "Anno_decorrenza": 2020, "Numero_pensioni": 19569.0}, {"Regione": "Friuli Venezia Giulia", "Anno_decorrenza": 2021, "Numero_pensioni": 20634.0}, {"Regione": "Friuli Venezia Giulia", "Anno_decorrenza": 2022, "Numero_pensioni": 19005.0}, {"Regione": "Friuli Venezia Giulia", "Anno_decorrenza": 2023, "Numero_pensioni": 17956.0}, {"Regione": "Friuli Venezia Giulia", "Anno_decorrenza": 2024, "Numero_pensioni": 4134.0}, {"Regione": "Lazio", "Anno_decorrenza": 2020, "Numero_pensioni": 74868.0}, {"Regione": "Lazio", "Anno_decorrenza": 2021, "Numero_pensioni": 77533.0}, {"Regione": "Lazio", "Anno_decorrenza": 2022, "Numero_pensioni": 74825.0}, {"Regione": "Lazio", "Anno_decorrenza": 2023, "Numero_pensioni": 69821.0}, {"Regione": "Lazio", "Anno_decorrenza": 2024, "Numero_pensioni": 15397.0}, {"Regione": "Liguria", "Anno_decorrenza": 2020, "Numero_pensioni": 25545.0}, {"Regione": "Liguria", "Anno_decorrenza": 2021, "Numero_pensioni": 25218.0}, {"Regione": "Liguria", "Anno_decorrenza": 2022, "Numero_pensioni": 24498.0}, {"Regione": "Liguria", "Anno_decorrenza": 2023, "Numero_pensioni": 22936.0}, {"Regione": "Liguria", "Anno_decorrenza": 2024, "Numero_pensioni": 5217.0}, {"Regione": "Lombardia", "Anno_decorrenza": 2020, "Numero_pensioni": 154352.0}, {"Regione": "Lombardia", "Anno_decorrenza": 2021, "Numero_pensioni": 150485.0}, {"Regione": "Lombardia", "Anno_decorrenza": 2022, "Numero_pensioni": 146834.0}, {"Regione": "Lombardia", "Anno_decorrenza": 2023, "Numero_pensioni": 138821.0}, {"Regione": "Lombardia", "Anno_decorrenza": 2024, "Numero_pensioni": 33368.0}, {"Regione": "Marche", "Anno_decorrenza": 2020, "Numero_pensioni": 25812.0}, {"Regione": "Marche", "Anno_decorrenza": 2021, "Numero_pensioni": 26691.0}, {"Regione": "Marche", "Anno_decorrenza": 2022, "Numero_pensioni": 25641.0}, {"Regione": "Marche", "Anno_decorrenza": 2023, "Numero_pensioni": 23211.0}, {"Regione": "Marche", "Anno_decorrenza": 2024, "Numero_pensioni": 5147.0}, {"Regione": "Molise", "Anno_decorrenza": 2020, "Numero_pensioni": 5273.0}, {"Regione": "Molise", "Anno_decorrenza": 2021, "Numero_pensioni": 5551.0}, {"Regione": "Molise", "Anno_decorrenza": 2022, "Numero_pensioni": 5358.0}, {"Regione": "Molise", "Anno_decorrenza": 2023, "Numero_pensioni": 4762.0}, {"Regione": "Molise", "Anno_decorrenza": 2024, "Numero_pensioni": 942.0}, {"Regione": "Piemonte e Valle d'Aosta", "Anno_decorrenza": 2020, "Numero_pensioni": 70984.0}, {"Regione": "Piemonte e Valle d'Aosta", "Anno_decorrenza": 2021, "Numero_pensioni": 71454.0}, {"Regione": "Piemonte e Valle d'Aosta", "Anno_decorrenza": 2022, "Numero_pensioni": 68669.0}, {"Regione": "Piemonte e Valle d'Aosta", "Anno_decorrenza": 2023, "Numero_pensioni": 62769.0}, {"Regione": "Piemonte e Valle d'Aosta", "Anno_decorrenza": 2024, "Numero_pensioni": 14684.0}, {"Regione": "Puglia", "Anno_decorrenza": 2020, "Numero_pensioni": 59958.0}, {"Regione": "Puglia", "Anno_decorrenza": 2021, "Numero_pensioni": 62253.0}, {"Regione": "Puglia", "Anno_decorrenza": 2022, "Numero_pensioni": 59235.0}, {"Regione": "Puglia", "Anno_decorrenza": 2023, "Numero_pensioni": 54050.0}, {"Regione": "Puglia", "Anno_decorrenza": 2024, "Numero_pensioni": 12194.0}, {"Regione": "Sardegna", "Anno_decorrenza": 2020, "Numero_pensioni": 23185.0}, {"Regione": "Sardegna", "Anno_decorrenza": 2021, "Numero_pensioni": 23582.0}, {"Regione": "Sardegna", "Anno_decorrenza": 2022, "Numero_pensioni": 22582.0}, {"Regione": "Sardegna", "Anno_decorrenza": 2023, "Numero_pensioni": 21042.0}, {"Regione": "Sardegna", "Anno_decorrenza": 2024, "Numero_pensioni": 4635.0}, {"Regione": "Sicilia", "Anno_decorrenza": 2020, "Numero_pensioni": 64189.0}, {"Regione": "Sicilia", "Anno_decorrenza": 2021, "Numero_pensioni": 67820.0}, {"Regione": "Sicilia", "Anno_decorrenza": 2022, "Numero_pensioni": 63926.0}, {"Regione": "Sicilia", "Anno_decorrenza": 2023, "Numero_pensioni": 60028.0}, {"Regione": "Sicilia", "Anno_decorrenza": 2024, "Numero_pensioni": 14243.0}, {"Regione": "Toscana", "Anno_decorrenza": 2020, "Numero_pensioni": 55676.0}, {"Regione": "Toscana", "Anno_decorrenza": 2021, "Numero_pensioni": 57014.0}, {"Regione": "Toscana", "Anno_decorrenza": 2022, "Numero_pensioni": 55590.0}, {"Regione": "Toscana", "Anno_decorrenza": 2023, "Numero_pensioni": 53102.0}, {"Regione": "Toscana", "Anno_decorrenza": 2024, "Numero_pensioni": 12841.0}, {"Regione": "Trentino Alto Adige", "Anno_decorrenza": 2020, "Numero_pensioni": 16226.0}, {"Regione": "Trentino Alto Adige", "Anno_decorrenza": 2021, "Numero_pensioni": 16800.0}, {"Regione": "Trentino Alto Adige", "Anno_decorrenza": 2022, "Numero_pensioni": 16675.0}, {"Regione": "Trentino Alto Adige", "Anno_decorrenza": 2023, "Numero_pensioni": 15242.0}, {"Regione": "Trentino Alto Adige", "Anno_decorrenza": 2024, "Numero_pensioni": 3204.0}, {"Regione": "Umbria", "Anno_decorrenza": 2020, "Numero_pensioni": 17490.0}, {"Regione": "Umbria", "Anno_decorrenza": 2021, "Numero_pensioni": 19347.0}, {"Regione": "Umbria", "Anno_decorrenza": 2022, "Numero_pensioni": 18273.0}, {"Regione": "Umbria", "Anno_decorrenza": 2023, "Numero_pensioni": 17888.0}, {"Regione": "Umbria", "Anno_decorrenza": 2024, "Numero_pensioni": 3402.0}, {"Regione": "Veneto", "Anno_decorrenza": 2020, "Numero_pensioni": 71746.0}, {"Regione": "Veneto", "Anno_decorrenza": 2021, "Numero_pensioni": 75678.0}, {"Regione": "Veneto", "Anno_decorrenza": 2022, "Numero_pensioni": 73479.0}, {"Regione": "Veneto", "Anno_decorrenza": 2023, "Numero_pensioni": 70631.0}, {"Regione": "Veneto", "Anno_decorrenza": 2024, "Numero_pensioni": 16618.0}], "categoria": [{"Categoria": "Anticipata", "Anno_decorrenza": 2020, "Numero_pensioni": 299965.0}, {"Categoria": "Anticipata", "Anno_decorrenza": 2021, "Numero_pensioni": 297741.0}, {"Categoria": "Anticipata", "Anno_decorrenza": 2022, "Numero_pensioni": 260417.0}, {"Categoria": "Anticipata", "Anno_decorrenza": 2023, "Numero_pensioni": 227639.0}, {"Categoria": "Anticipata", "Anno_decorrenza": 2024, "Numero_pensioni": 56660.0}, {"Categoria": "Invalidita'", "Anno_decorrenza": 2020, "Numero_pensioni": 48710.0}, {"Categoria": "Invalidita'", "Anno_decorrenza": 2021, "Numero_pensioni": 55394.0}, {"Categoria": "Invalidita'", "Anno_decorrenza": 2022, "Numero_pensioni": 54998.0}, {"Categoria": "Invalidita'", "Anno_decorrenza": 2023, "Numero_pensioni": 54513.0}, {"Categoria": "Invalidita'", "Anno_decorrenza": 2024, "Numero_pensioni": 8756.0}, {"Categoria": "Superstiti", "Anno_decorrenza": 2020, "Numero_pensioni": 259417.0}, {"Categoria": "Superstiti", "Anno_decorrenza": 2021, "Numero_pensioni": 258180.0}, {"Categoria": "Superstiti", "Anno_decorrenza": 2022, "Numero_pensioni": 249620.0}, {"Categoria": "Superstiti", "Anno_decorrenza": 2023, "Numero_pensioni": 224206.0}, {"Categoria": "Superstiti", "Anno_decorrenza": 2024, "Numero_pensioni": 48978.0}, {"Categoria": "Vecchiaia", "Anno_decorrenza": 2020, "Numero_pensioni": 281209.0}, {"Categoria": "Vecchiaia", "Anno_decorrenza": 2021, "Numero_pensioni": 297986.0}, {"Categoria": "Vecchiaia", "Anno_decorrenza": 2022, "Numero_pensioni": 310767.0}, {"Categoria": "Vecchiaia", "Anno_decorrenza": 2023, "Numero_pensioni": 312878.0}, {"Categoria": "Vecchiaia", "Anno_decorrenza": 2024, "Numero_pensioni": 72829.0}], "importo": [{"classe_importo": "1.000,00 - 1.499,99", "Anno_decorrenza": 2020, "Numero_pensioni": 133997.0}, {"classe_importo": "1.000,00 - 1.499,99", "Anno_decorrenza": 2021, "Numero_pensioni": 143606.0}, {"classe_importo": "1.000,00 - 1.499,99", "Anno_decorrenza": 2022, "Numero_pensioni": 141105.0}, {"classe_importo": "1.000,00 - 1.499,99", "Anno_decorrenza": 2023, "Numero_pensioni": 139558.0}, {"classe_importo": "1.000,00 - 1.499,99", "Anno_decorrenza": 2024, "Numero_pensioni": 32894.0}, {"classe_importo": "1.500,00 - 1.999,99", "Anno_decorrenza": 2020, "Numero_pensioni": 97739.0}, {"classe_importo": "1.500,00 - 1.999,99", "Anno_decorrenza": 2021, "Numero_pensioni": 98183.0}, {"classe_importo": "1.500,00 - 1.999,99", "Anno_decorrenza": 2022, "Numero_pensioni": 93204.0}, {"classe_importo": "1.500,00 - 1.999,99", "Anno_decorrenza": 2023, "Numero_pensioni": 94596.0}, {"classe_importo": "1.500,00 - 1.999,99", "Anno_decorrenza": 2024, "Numero_pensioni": 24208.0}, {"classe_importo": "2.000,00 - 2.999,99", "Anno_decorrenza": 2020, "Numero_pensioni": 137942.0}, {"classe_importo": "2.000,00 - 2.999,99", "Anno_decorrenza": 2021, "Numero_pensioni": 127532.0}, {"classe_importo": "2.000,00 - 2.999,99", "Anno_decorrenza": 2022, "Numero_pensioni": 103674.0}, {"classe_importo": "2.000,00 - 2.999,99", "Anno_decorrenza": 2023, "Numero_pensioni": 94219.0}, {"classe_importo": "2.000,00 - 2.999,99", "Anno_decorrenza": 2024, "Numero_pensioni": 20463.0}, {"classe_importo": "3.000,00 e piu'", "Anno_decorrenza": 2020, "Numero_pensioni": 52739.0}, {"classe_importo": "3.000,00 e piu'", "Anno_decorrenza": 2021, "Numero_pensioni": 47061.0}, {"classe_importo": "3.000,00 e piu'", "Anno_decorrenza": 2022, "Numero_pensioni": 43635.0}, {"classe_importo": "3.000,00 e piu'", "Anno_decorrenza": 2023, "Numero_pensioni": 41332.0}, {"classe_importo": "3.000,00 e piu'", "Anno_decorrenza": 2024, "Numero_pensioni": 9561.0}, {"classe_importo": "500,00 - 999,99", "Anno_decorrenza": 2020, "Numero_pensioni": 270298.0}, {"classe_importo": "500,00 - 999,99", "Anno_decorrenza": 2021, "Numero_pensioni": 289764.0}, {"classe_importo": "500,00 - 999,99", "Anno_decorrenza": 2022, "Numero_pensioni": 289244.0}, {"classe_importo": "500,00 - 999,99", "Anno_decorrenza": 2023, "Numero_pensioni": 286832.0}, {"classe_importo": "500,00 - 999,99", "Anno_decorrenza": 2024, "Numero_pensioni": 65188.0}, {"classe_importo": "Fino a 499,99", "Anno_decorrenza": 2020, "Numero_pensioni": 196586.0}, {"classe_importo": "Fino a 499,99", "Anno_decorrenza": 2021, "Numero_pensioni": 203155.0}, {"classe_importo": "Fino a 499,99", "Anno_decorrenza": 2022, "Numero_pensioni": 204940.0}, {"classe_importo": "Fino a 499,99", "Anno_decorrenza": 2023, "Numero_pensioni": 162699.0}, {"classe_importo": "Fino a 499,99", "Anno_decorrenza": 2024, "Numero_pensioni": 34909.0}], "eta": [{"classe_eta": "55 - 59", "Anno_decorrenza": 2020, "Numero_pensioni": 93290.0}, {"classe_eta": "55 - 59", "Anno_decorrenza": 2021, "Numero_pensioni": 96907.0}, {"classe_eta": "55 - 59", "Anno_decorrenza": 2022, "Numero_pensioni": 99064.0}, {"classe_eta": "55 - 59", "Anno_decorrenza": 2023, "Numero_pensioni": 87369.0}, {"classe_eta": "55 - 59", "Anno_decorrenza": 2024, "Numero_pensioni": 20805.0}, {"classe_eta": "60 - 64", "Anno_decorrenza": 2020, "Numero_pensioni": 229584.0}, {"classe_eta": "60 - 64", "Anno_decorrenza": 2021, "Numero_pensioni": 233704.0}, {"classe_eta": "60 - 64", "Anno_decorrenza": 2022, "Numero_pensioni": 196968.0}, {"classe_eta": "60 - 64", "Anno_decorrenza": 2023, "Numero_pensioni": 178306.0}, {"classe_eta": "60 - 64", "Anno_decorrenza": 2024, "Numero_pensioni": 42099.0}, {"classe_eta": "65 - 67", "Anno_decorrenza": 2020, "Numero_pensioni": 302156.0}, {"classe_eta": "65 - 67", "Anno_decorrenza": 2021, "Numero_pensioni": 309096.0}, {"classe_eta": "65 - 67", "Anno_decorrenza": 2022, "Numero_pensioni": 311558.0}, {"classe_eta": "65 - 67", "Anno_decorrenza": 2023, "Numero_pensioni": 301449.0}, {"classe_eta": "65 - 67", "Anno_decorrenza": 2024, "Numero_pensioni": 67422.0}, {"classe_eta": "68 e oltre", "Anno_decorrenza": 2020, "Numero_pensioni": 224088.0}, {"classe_eta": "68 e oltre", "Anno_decorrenza": 2021, "Numero_pensioni": 227453.0}, {"classe_eta": "68 e oltre", "Anno_decorrenza": 2022, "Numero_pensioni": 229547.0}, {"classe_eta": "68 e oltre", "Anno_decorrenza": 2023, "Numero_pensioni": 217597.0}, {"classe_eta": "68 e oltre", "Anno_decorrenza": 2024, "Numero_pensioni": 51239.0}, {"classe_eta": "Fino a 54", "Anno_decorrenza": 2020, "Numero_pensioni": 40183.0}, {"classe_eta": "Fino a 54", "Anno_decorrenza": 2021, "Numero_pensioni": 42141.0}, {"classe_eta": "Fino a 54", "Anno_decorrenza": 2022, "Numero_pensioni": 38665.0}, {"classe_eta": "Fino a 54", "Anno_decorrenza": 2023, "Numero_pensioni": 34515.0}, {"classe_eta": "Fino a 54", "Anno_decorrenza": 2024, "Numero_pensioni": 5658.0}], "sesso": [{"SESSO": "Femmine", "Anno_decorrenza": 2020, "Numero_pensioni": 487867.0}, {"SESSO": "Femmine", "Anno_decorrenza": 2021, "Numero_pensioni": 506750.0}, {"SESSO": "Femmine", "Anno_decorrenza": 2022, "Numero_pensioni": 490341.0}, {"SESSO": "Femmine", "Anno_decorrenza": 2023, "Numero_pensioni": 443910.0}, {"SESSO": "Femmine", "Anno_decorrenza": 2024, "Numero_pensioni": 97876.0}, {"SESSO": "Maschi", "Anno_decorrenza": 2020, "Numero_pensioni": 401434.0}, {"SESSO": "Maschi", "Anno_decorrenza": 2021, "Numero_pensioni": 402551.0}, {"SESSO": "Maschi", "Anno_decorrenza": 2022, "Numero_pensioni": 385461.0}, {"SESSO": "Maschi", "Anno_decorrenza": 2023, "Numero_pensioni": 375326.0}, {"SESSO": "Maschi", "Anno_decorrenza": 2024, "Numero_pensioni": 89347.0}], "area": [{"area_geografica": "Centro", "Anno_decorrenza": 2020, "Numero_pensioni": 173846.0}, {"area_geografica": "Centro", "Anno_decorrenza": 2021, "Numero_pensioni": 180585.0}, {"area_geografica": "Centro", "Anno_decorrenza": 2022, "Numero_pensioni": 174329.0}, {"area_geografica": "Centro", "Anno_decorrenza": 2023, "Numero_pensioni": 164022.0}, {"area_geografica": "Centro", "Anno_decorrenza": 2024, "Numero_pensioni": 36787.0}, {"area_geografica": "Nord Est", "Anno_decorrenza": 2020, "Numero_pensioni": 179289.0}, {"area_geografica": "Nord Est", "Anno_decorrenza": 2021, "Numero_pensioni": 186021.0}, {"area_geografica": "Nord Est", "Anno_decorrenza": 2022, "Numero_pensioni": 179661.0}, {"area_geografica": "Nord Est", "Anno_decorrenza": 2023, "Numero_pensioni": 171163.0}, {"area_geografica": "Nord Est", "Anno_decorrenza": 2024, "Numero_pensioni": 39079.0}, {"area_geografica": "Nord Ovest", "Anno_decorrenza": 2020, "Numero_pensioni": 250881.0}, {"area_geografica": "Nord Ovest", "Anno_decorrenza": 2021, "Numero_pensioni": 247157.0}, {"area_geografica": "Nord Ovest", "Anno_decorrenza": 2022, "Numero_pensioni": 240001.0}, {"area_geografica": "Nord Ovest", "Anno_decorrenza": 2023, "Numero_pensioni": 224526.0}, {"area_geografica": "Nord Ovest", "Anno_decorrenza": 2024, "Numero_pensioni": 53269.0}, {"area_geografica": "Sud e Isole", "Anno_decorrenza": 2020, "Numero_pensioni": 285285.0}, {"area_geografica": "Sud e Isole", "Anno_decorrenza": 2021, "Numero_pensioni": 295538.0}, {"area_geografica": "Sud e Isole", "Anno_decorrenza": 2022, "Numero_pensioni": 281811.0}, {"area_geografica": "Sud e Isole", "Anno_decorrenza": 2023, "Numero_pensioni": 259525.0}, {"area_geografica": "Sud e Isole", "Anno_decorrenza": 2024, "Numero_pensioni": 58088.0}], "gestione": [{"tgestio": "Assegni Sociali", "Anno_decorrenza": 2020, "Numero_pensioni": 74060.0}, {"tgestio": "Assegni Sociali", "Anno_decorrenza": 2021, "Numero_pensioni": 81007.0}, {"tgestio": "Assegni Sociali", "Anno_decorrenza": 2022, "Numero_pensioni": 88246.0}, {"tgestio": "Assegni Sociali", "Anno_decorrenza": 2023, "Numero_pensioni": 90189.0}, {"tgestio": "Assegni Sociali", "Anno_decorrenza": 2024, "Numero_pensioni": 24955.0}, {"tgestio": "Autonomi (compresi i Parasubordinati)", "Anno_decorrenza": 2020, "Numero_pensioni": 260731.0}, {"tgestio": "Autonomi (compresi i Parasubordinati)", "Anno_decorrenza": 2021, "Numero_pensioni": 264058.0}, {"tgestio": "Autonomi (compresi i Parasubordinati)", "Anno_decorrenza": 2022, "Numero_pensioni": 257947.0}, {"tgestio": "Autonomi (compresi i Parasubordinati)", "Anno_decorrenza": 2023, "Numero_pensioni": 248676.0}, {"tgestio": "Autonomi (compresi i Parasubordinati)", "Anno_decorrenza": 2024, "Numero_pensioni": 57332.0}, {"tgestio": "FPLD comprese le gestioni a contabilità separata", "Anno_decorrenza": 2020, "Numero_pensioni": 379128.0}, {"tgestio": "FPLD comprese le gestioni a contabilità separata", "Anno_decorrenza": 2021, "Numero_pensioni": 394694.0}, {"tgestio": "FPLD comprese le gestioni a contabilità separata", "Anno_decorrenza": 2022, "Numero_pensioni": 380631.0}, {"tgestio": "FPLD comprese le gestioni a contabilità separata", "Anno_decorrenza": 2023, "Numero_pensioni": 350948.0}, {"tgestio": "FPLD comprese le gestioni a contabilità separata", "Anno_decorrenza": 2024, "Numero_pensioni": 86031.0}, {"tgestio": "Gestione Dipendenti Pubblici", "Anno_decorrenza": 2020, "Numero_pensioni": 175382.0}, {"tgestio": "Gestione Dipendenti Pubblici", "Anno_decorrenza": 2021, "Numero_pensioni": 169542.0}, {"tgestio": "Gestione Dipendenti Pubblici", "Anno_decorrenza": 2022, "Numero_pensioni": 148978.0}, {"tgestio": "Gestione Dipendenti Pubblici", "Anno_decorrenza": 2023, "Numero_pensioni": 129423.0}, {"tgestio": "Gestione Dipendenti Pubblici", "Anno_decorrenza": 2024, "Numero_pensioni": 18905.0}], "sesso_cat": [{"SESSO": "Femmine", "Categoria": "Anticipata", "Anno_decorrenza": 2020, "Numero_pensioni": 118415.0}, {"SESSO": "Femmine", "Categoria": "Anticipata", "Anno_decorrenza": 2021, "Numero_pensioni": 122227.0}, {"SESSO": "Femmine", "Categoria": "Anticipata", "Anno_decorrenza": 2022, "Numero_pensioni": 107545.0}, {"SESSO": "Femmine", "Categoria": "Anticipata", "Anno_decorrenza": 2023, "Numero_pensioni": 79357.0}, {"SESSO": "Femmine", "Categoria": "Anticipata", "Anno_decorrenza": 2024, "Numero_pensioni": 16588.0}, {"SESSO": "Femmine", "Categoria": "Invalidita'", "Anno_decorrenza": 2020, "Numero_pensioni": 17029.0}, {"SESSO": "Femmine", "Categoria": "Invalidita'", "Anno_decorrenza": 2021, "Numero_pensioni": 20216.0}, {"SESSO": "Femmine", "Categoria": "Invalidita'", "Anno_decorrenza": 2022, "Numero_pensioni": 19581.0}, {"SESSO": "Femmine", "Categoria": "Invalidita'", "Anno_decorrenza": 2023, "Numero_pensioni": 19556.0}, {"SESSO": "Femmine", "Categoria": "Invalidita'", "Anno_decorrenza": 2024, "Numero_pensioni": 3243.0}, {"SESSO": "Femmine", "Categoria": "Superstiti", "Anno_decorrenza": 2020, "Numero_pensioni": 211098.0}, {"SESSO": "Femmine", "Categoria": "Superstiti", "Anno_decorrenza": 2021, "Numero_pensioni": 209273.0}, {"SESSO": "Femmine", "Categoria": "Superstiti", "Anno_decorrenza": 2022, "Numero_pensioni": 201630.0}, {"SESSO": "Femmine", "Categoria": "Superstiti", "Anno_decorrenza": 2023, "Numero_pensioni": 180912.0}, {"SESSO": "Femmine", "Categoria": "Superstiti", "Anno_decorrenza": 2024, "Numero_pensioni": 40469.0}, {"SESSO": "Femmine", "Categoria": "Vecchiaia", "Anno_decorrenza": 2020, "Numero_pensioni": 141325.0}, {"SESSO": "Femmine", "Categoria": "Vecchiaia", "Anno_decorrenza": 2021, "Numero_pensioni": 155034.0}, {"SESSO": "Femmine", "Categoria": "Vecchiaia", "Anno_decorrenza": 2022, "Numero_pensioni": 161585.0}, {"SESSO": "Femmine", "Categoria": "Vecchiaia", "Anno_decorrenza": 2023, "Numero_pensioni": 164085.0}, {"SESSO": "Femmine", "Categoria": "Vecchiaia", "Anno_decorrenza": 2024, "Numero_pensioni": 37576.0}, {"SESSO": "Maschi", "Categoria": "Anticipata", "Anno_decorrenza": 2020, "Numero_pensioni": 181550.0}, {"SESSO": "Maschi", "Categoria": "Anticipata", "Anno_decorrenza": 2021, "Numero_pensioni": 175514.0}, {"SESSO": "Maschi", "Categoria": "Anticipata", "Anno_decorrenza": 2022, "Numero_pensioni": 152872.0}, {"SESSO": "Maschi", "Categoria": "Anticipata", "Anno_decorrenza": 2023, "Numero_pensioni": 148282.0}, {"SESSO": "Maschi", "Categoria": "Anticipata", "Anno_decorrenza": 2024, "Numero_pensioni": 40072.0}, {"SESSO": "Maschi", "Categoria": "Invalidita'", "Anno_decorrenza": 2020, "Numero_pensioni": 31681.0}, {"SESSO": "Maschi", "Categoria": "Invalidita'", "Anno_decorrenza": 2021, "Numero_pensioni": 35178.0}, {"SESSO": "Maschi", "Categoria": "Invalidita'", "Anno_decorrenza": 2022, "Numero_pensioni": 35417.0}, {"SESSO": "Maschi", "Categoria": "Invalidita'", "Anno_decorrenza": 2023, "Numero_pensioni": 34957.0}, {"SESSO": "Maschi", "Categoria": "Invalidita'", "Anno_decorrenza": 2024, "Numero_pensioni": 5513.0}, {"SESSO": "Maschi", "Categoria": "Superstiti", "Anno_decorrenza": 2020, "Numero_pensioni": 48319.0}, {"SESSO": "Maschi", "Categoria": "Superstiti", "Anno_decorrenza": 2021, "Numero_pensioni": 48907.0}, {"SESSO": "Maschi", "Categoria": "Superstiti", "Anno_decorrenza": 2022, "Numero_pensioni": 47990.0}, {"SESSO": "Maschi", "Categoria": "Superstiti", "Anno_decorrenza": 2023, "Numero_pensioni": 43294.0}, {"SESSO": "Maschi", "Categoria": "Superstiti", "Anno_decorrenza": 2024, "Numero_pensioni": 8509.0}, {"SESSO": "Maschi", "Categoria": "Vecchiaia", "Anno_decorrenza": 2020, "Numero_pensioni": 139884.0}, {"SESSO": "Maschi", "Categoria": "Vecchiaia", "Anno_decorrenza": 2021, "Numero_pensioni": 142952.0}, {"SESSO": "Maschi", "Categoria": "Vecchiaia", "Anno_decorrenza": 2022, "Numero_pensioni": 149182.0}, {"SESSO": "Maschi", "Categoria": "Vecchiaia", "Anno_decorrenza": 2023, "Numero_pensioni": 148793.0}, {"SESSO": "Maschi", "Categoria": "Vecchiaia", "Anno_decorrenza": 2024, "Numero_pensioni": 35253.0}], "regione_area": [{"Regione": "Abruzzo", "area_geografica": "Sud e Isole", "Numero_pensioni": 82649.0}, {"Regione": "Basilicata", "area_geografica": "Sud e Isole", "Numero_pensioni": 36802.0}, {"Regione": "Calabria", "area_geografica": "Sud e Isole", "Numero_pensioni": 125225.0}, {"Regione": "Campania", "area_geografica": "Sud e Isole", "Numero_pensioni": 300763.0}, {"Regione": "Emilia Romagna", "area_geografica": "Nord Est", "Numero_pensioni": 297616.0}, {"Regione": "Friuli Venezia Giulia", "area_geografica": "Nord Est", "Numero_pensioni": 81298.0}, {"Regione": "Lazio", "area_geografica": "Centro", "Numero_pensioni": 312444.0}, {"Regione": "Liguria", "area_geografica": "Nord Ovest", "Numero_pensioni": 103414.0}, {"Regione": "Lombardia", "area_geografica": "Nord Ovest", "Numero_pensioni": 623860.0}, {"Regione": "Marche", "area_geografica": "Centro", "Numero_pensioni": 106502.0}, {"Regione": "Molise", "area_geografica": "Sud e Isole", "Numero_pensioni": 21886.0}, {"Regione": "Piemonte e Valle d'Aosta", "area_geografica": "Nord Ovest", "Numero_pensioni": 288560.0}, {"Regione": "Puglia", "area_geografica": "Sud e Isole", "Numero_pensioni": 247690.0}, {"Regione": "Sardegna", "area_geografica": "Sud e Isole", "Numero_pensioni": 95026.0}, {"Regione": "Sicilia", "area_geografica": "Sud e Isole", "Numero_pensioni": 270206.0}, {"Regione": "Toscana", "area_geografica": "Centro", "Numero_pensioni": 234223.0}, {"Regione": "Trentino Alto Adige", "area_geografica": "Nord Est", "Numero_pensioni": 68147.0}, {"Regione": "Umbria", "area_geografica": "Centro", "Numero_pensioni": 76400.0}, {"Regione": "Veneto", "area_geografica": "Nord Est", "Numero_pensioni": 308152.0}], "meta": {"anni": [2020, 2021, 2022, 2023, 2024], "trimestri": ["I trimestre", "II trimestre", "III trimestre", "IV trimestre"], "regioni": ["Abruzzo", "Basilicata", "Calabria", "Campania", "Emilia Romagna", "Friuli Venezia Giulia", "Lazio", "Liguria", "Lombardia", "Marche", "Molise", "Piemonte e Valle d'Aosta", "Puglia", "Sardegna", "Sicilia", "Toscana", "Trentino Alto Adige", "Umbria", "Veneto"], "categorie": ["Anticipata", "Invalidita'", "Superstiti", "Vecchiaia"], "importo_order": ["Fino a 499,99", "500,00 - 999,99", "1.000,00 - 1.499,99", "1.500,00 - 1.999,99", "2.000,00 - 2.999,99", "3.000,00 e piu'"], "eta_order": ["Fino a 54", "55 - 59", "60 - 64", "65 - 67", "68 e oltre"], "aree": ["Centro", "Nord Est", "Nord Ovest", "Sud e Isole"], "gestioni": ["Assegni Sociali", "Autonomi (compresi i Parasubordinati)", "FPLD comprese le gestioni a contabilità separata", "Gestione Dipendenti Pubblici"]}};
+const DATA={"trend": [{"Anno_decorrenza": 2020, "Trimestrale": "I trimestre", "Numero_pensioni": 228427.0}, {"Anno_decorrenza": 2020, "Trimestrale": "II trimestre", "Numero_pensioni": 203948.0}, {"Anno_decorrenza": 2020, "Trimestrale": "III trimestre", "Numero_pensioni": 235791.0}, {"Anno_decorrenza": 2020, "Trimestrale": "IV trimestre", "Numero_pensioni": 221135.0}, {"Anno_decorrenza": 2021, "Trimestrale": "I trimestre", "Numero_pensioni": 233357.0}, {"Anno_decorrenza": 2021, "Trimestrale": "II trimestre", "Numero_pensioni": 217163.0}, {"Anno_decorrenza": 2021, "Trimestrale": "III trimestre", "Numero_pensioni": 243255.0}, {"Anno_decorrenza": 2021, "Trimestrale": "IV trimestre", "Numero_pensioni": 215526.0}, {"Anno_decorrenza": 2022, "Trimestrale": "I trimestre", "Numero_pensioni": 243224.0}, {"Anno_decorrenza": 2022, "Trimestrale": "II trimestre", "Numero_pensioni": 209701.0}, {"Anno_decorrenza": 2022, "Trimestrale": "III trimestre", "Numero_pensioni": 223853.0}, {"Anno_decorrenza": 2022, "Trimestrale": "IV trimestre", "Numero_pensioni": 199024.0}, {"Anno_decorrenza": 2023, "Trimestrale": "I trimestre", "Numero_pensioni": 223301.0}, {"Anno_decorrenza": 2023, "Trimestrale": "II trimestre", "Numero_pensioni": 198894.0}, {"Anno_decorrenza": 2023, "Trimestrale": "III trimestre", "Numero_pensioni": 211084.0}, {"Anno_decorrenza": 2023, "Trimestrale": "IV trimestre", "Numero_pensioni": 185957.0}, {"Anno_decorrenza": 2024, "Trimestrale": "I trimestre", "Numero_pensioni": 187223.0}], "regione": [{"Regione": "Abruzzo", "Anno_decorrenza": 2020, "Numero_pensioni": 20499.0}, {"Regione": "Abruzzo", "Anno_decorrenza": 2021, "Numero_pensioni": 20698.0}, {"Regione": "Abruzzo", "Anno_decorrenza": 2022, "Numero_pensioni": 19538.0}, {"Regione": "Abruzzo", "Anno_decorrenza": 2023, "Numero_pensioni": 17861.0}, {"Regione": "Abruzzo", "Anno_decorrenza": 2024, "Numero_pensioni": 4053.0}, {"Regione": "Basilicata", "Anno_decorrenza": 2020, "Numero_pensioni": 8791.0}, {"Regione": "Basilicata", "Anno_decorrenza": 2021, "Numero_pensioni": 9030.0}, {"Regione": "Basilicata", "Anno_decorrenza": 2022, "Numero_pensioni": 8967.0}, {"Regione": "Basilicata", "Anno_decorrenza": 2023, "Numero_pensioni": 8224.0}, {"Regione": "Basilicata", "Anno_decorrenza": 2024, "Numero_pensioni": 1790.0}, {"Regione": "Calabria", "Anno_decorrenza": 2020, "Numero_pensioni": 31078.0}, {"Regione": "Calabria", "Anno_decorrenza": 2021, "Numero_pensioni": 31329.0}, {"Regione": "Calabria", "Anno_decorrenza": 2022, "Numero_pensioni": 29849.0}, {"Regione": "Calabria", "Anno_decorrenza": 2023, "Numero_pensioni": 27043.0}, {"Regione": "Calabria", "Anno_decorrenza": 2024, "Numero_pensioni": 5926.0}, {"Regione": "Campania", "Anno_decorrenza": 2020, "Numero_pensioni": 72312.0}, {"Regione": "Campania", "Anno_decorrenza": 2021, "Numero_pensioni": 75275.0}, {"Regione": "Campania", "Anno_decorrenza": 2022, "Numero_pensioni": 72356.0}, {"Regione": "Campania", "Anno_decorrenza": 2023, "Numero_pensioni": 66515.0}, {"Regione": "Campania", "Anno_decorrenza": 2024, "Numero_pensioni": 14305.0}, {"Regione": "Emilia Romagna", "Anno_decorrenza": 2020, "Numero_pensioni": 71748.0}, {"Regione": "Emilia Romagna", "Anno_decorrenza": 2021, "Numero_pensioni": 72909.0}, {"Regione": "Emilia Romagna", "Anno_decorrenza": 2022, "Numero_pensioni": 70502.0}, {"Regione": "Emilia Romagna", "Anno_decorrenza": 2023, "Numero_pensioni": 67334.0}, {"Regione": "Emilia Romagna", "Anno_decorrenza": 2024, "Numero_pensioni": 15123.0}, {"Regione": "Friuli Venezia Giulia", "Anno_decorrenza": 2020, "Numero_pensioni": 19569.0}, {"Regione": "Friuli Venezia Giulia", "Anno_decorrenza": 2021, "Numero_pensioni": 20634.0}, {"Regione": "Friuli Venezia Giulia", "Anno_decorrenza": 2022, "Numero_pensioni": 19005.0}, {"Regione": "Friuli Venezia Giulia", "Anno_decorrenza": 2023, "Numero_pensioni": 17956.0}, {"Regione": "Friuli Venezia Giulia", "Anno_decorrenza": 2024, "Numero_pensioni": 4134.0}, {"Regione": "Lazio", "Anno_decorrenza": 2020, "Numero_pensioni": 74868.0}, {"Regione": "Lazio", "Anno_decorrenza": 2021, "Numero_pensioni": 77533.0}, {"Regione": "Lazio", "Anno_decorrenza": 2022, "Numero_pensioni": 74825.0}, {"Regione": "Lazio", "Anno_decorrenza": 2023, "Numero_pensioni": 69821.0}, {"Regione": "Lazio", "Anno_decorrenza": 2024, "Numero_pensioni": 15397.0}, {"Regione": "Liguria", "Anno_decorrenza": 2020, "Numero_pensioni": 25545.0}, {"Regione": "Liguria", "Anno_decorrenza": 2021, "Numero_pensioni": 25218.0}, {"Regione": "Liguria", "Anno_decorrenza": 2022, "Numero_pensioni": 24498.0}, {"Regione": "Liguria", "Anno_decorrenza": 2023, "Numero_pensioni": 22936.0}, {"Regione": "Liguria", "Anno_decorrenza": 2024, "Numero_pensioni": 5217.0}, {"Regione": "Lombardia", "Anno_decorrenza": 2020, "Numero_pensioni": 154352.0}, {"Regione": "Lombardia", "Anno_decorrenza": 2021, "Numero_pensioni": 150485.0}, {"Regione": "Lombardia", "Anno_decorrenza": 2022, "Numero_pensioni": 146834.0}, {"Regione": "Lombardia", "Anno_decorrenza": 2023, "Numero_pensioni": 138821.0}, {"Regione": "Lombardia", "Anno_decorrenza": 2024, "Numero_pensioni": 33368.0}, {"Regione": "Marche", "Anno_decorrenza": 2020, "Numero_pensioni": 25812.0}, {"Regione": "Marche", "Anno_decorrenza": 2021, "Numero_pensioni": 26691.0}, {"Regione": "Marche", "Anno_decorrenza": 2022, "Numero_pensioni": 25641.0}, {"Regione": "Marche", "Anno_decorrenza": 2023, "Numero_pensioni": 23211.0}, {"Regione": "Marche", "Anno_decorrenza": 2024, "Numero_pensioni": 5147.0}, {"Regione": "Molise", "Anno_decorrenza": 2020, "Numero_pensioni": 5273.0}, {"Regione": "Molise", "Anno_decorrenza": 2021, "Numero_pensioni": 5551.0}, {"Regione": "Molise", "Anno_decorrenza": 2022, "Numero_pensioni": 5358.0}, {"Regione": "Molise", "Anno_decorrenza": 2023, "Numero_pensioni": 4762.0}, {"Regione": "Molise", "Anno_decorrenza": 2024, "Numero_pensioni": 942.0}, {"Regione": "Piemonte e Valle d'Aosta", "Anno_decorrenza": 2020, "Numero_pensioni": 70984.0}, {"Regione": "Piemonte e Valle d'Aosta", "Anno_decorrenza": 2021, "Numero_pensioni": 71454.0}, {"Regione": "Piemonte e Valle d'Aosta", "Anno_decorrenza": 2022, "Numero_pensioni": 68669.0}, {"Regione": "Piemonte e Valle d'Aosta", "Anno_decorrenza": 2023, "Numero_pensioni": 62769.0}, {"Regione": "Piemonte e Valle d'Aosta", "Anno_decorrenza": 2024, "Numero_pensioni": 14684.0}, {"Regione": "Puglia", "Anno_decorrenza": 2020, "Numero_pensioni": 59958.0}, {"Regione": "Puglia", "Anno_decorrenza": 2021, "Numero_pensioni": 62253.0}, {"Regione": "Puglia", "Anno_decorrenza": 2022, "Numero_pensioni": 59235.0}, {"Regione": "Puglia", "Anno_decorrenza": 2023, "Numero_pensioni": 54050.0}, {"Regione": "Puglia", "Anno_decorrenza": 2024, "Numero_pensioni": 12194.0}, {"Regione": "Sardegna", "Anno_decorrenza": 2020, "Numero_pensioni": 23185.0}, {"Regione": "Sardegna", "Anno_decorrenza": 2021, "Numero_pensioni": 23582.0}, {"Regione": "Sardegna", "Anno_decorrenza": 2022, "Numero_pensioni": 22582.0}, {"Regione": "Sardegna", "Anno_decorrenza": 2023, "Numero_pensioni": 21042.0}, {"Regione": "Sardegna", "Anno_decorrenza": 2024, "Numero_pensioni": 4635.0}, {"Regione": "Sicilia", "Anno_decorrenza": 2020, "Numero_pensioni": 64189.0}, {"Regione": "Sicilia", "Anno_decorrenza": 2021, "Numero_pensioni": 67820.0}, {"Regione": "Sicilia", "Anno_decorrenza": 2022, "Numero_pensioni": 63926.0}, {"Regione": "Sicilia", "Anno_decorrenza": 2023, "Numero_pensioni": 60028.0}, {"Regione": "Sicilia", "Anno_decorrenza": 2024, "Numero_pensioni": 14243.0}, {"Regione": "Toscana", "Anno_decorrenza": 2020, "Numero_pensioni": 55676.0}, {"Regione": "Toscana", "Anno_decorrenza": 2021, "Numero_pensioni": 57014.0}, {"Regione": "Toscana", "Anno_decorrenza": 2022, "Numero_pensioni": 55590.0}, {"Regione": "Toscana", "Anno_decorrenza": 2023, "Numero_pensioni": 53102.0}, {"Regione": "Toscana", "Anno_decorrenza": 2024, "Numero_pensioni": 12841.0}, {"Regione": "Trentino Alto Adige", "Anno_decorrenza": 2020, "Numero_pensioni": 16226.0}, {"Regione": "Trentino Alto Adige", "Anno_decorrenza": 2021, "Numero_pensioni": 16800.0}, {"Regione": "Trentino Alto Adige", "Anno_decorrenza": 2022, "Numero_pensioni": 16675.0}, {"Regione": "Trentino Alto Adige", "Anno_decorrenza": 2023, "Numero_pensioni": 15242.0}, {"Regione": "Trentino Alto Adige", "Anno_decorrenza": 2024, "Numero_pensioni": 3204.0}, {"Regione": "Umbria", "Anno_decorrenza": 2020, "Numero_pensioni": 17490.0}, {"Regione": "Umbria", "Anno_decorrenza": 2021, "Numero_pensioni": 19347.0}, {"Regione": "Umbria", "Anno_decorrenza": 2022, "Numero_pensioni": 18273.0}, {"Regione": "Umbria", "Anno_decorrenza": 2023, "Numero_pensioni": 17888.0}, {"Regione": "Umbria", "Anno_decorrenza": 2024, "Numero_pensioni": 3402.0}, {"Regione": "Veneto", "Anno_decorrenza": 2020, "Numero_pensioni": 71746.0}, {"Regione": "Veneto", "Anno_decorrenza": 2021, "Numero_pensioni": 75678.0}, {"Regione": "Veneto", "Anno_decorrenza": 2022, "Numero_pensioni": 73479.0}, {"Regione": "Veneto", "Anno_decorrenza": 2023, "Numero_pensioni": 70631.0}, {"Regione": "Veneto", "Anno_decorrenza": 2024, "Numero_pensioni": 16618.0}], "categoria": [{"Categoria": "Anticipata", "Anno_decorrenza": 2020, "Numero_pensioni": 299965.0}, {"Categoria": "Anticipata", "Anno_decorrenza": 2021, "Numero_pensioni": 297741.0}, {"Categoria": "Anticipata", "Anno_decorrenza": 2022, "Numero_pensioni": 260417.0}, {"Categoria": "Anticipata", "Anno_decorrenza": 2023, "Numero_pensioni": 227639.0}, {"Categoria": "Anticipata", "Anno_decorrenza": 2024, "Numero_pensioni": 56660.0}, {"Categoria": "Invalidita'", "Anno_decorrenza": 2020, "Numero_pensioni": 48710.0}, {"Categoria": "Invalidita'", "Anno_decorrenza": 2021, "Numero_pensioni": 55394.0}, {"Categoria": "Invalidita'", "Anno_decorrenza": 2022, "Numero_pensioni": 54998.0}, {"Categoria": "Invalidita'", "Anno_decorrenza": 2023, "Numero_pensioni": 54513.0}, {"Categoria": "Invalidita'", "Anno_decorrenza": 2024, "Numero_pensioni": 8756.0}, {"Categoria": "Superstiti", "Anno_decorrenza": 2020, "Numero_pensioni": 259417.0}, {"Categoria": "Superstiti", "Anno_decorrenza": 2021, "Numero_pensioni": 258180.0}, {"Categoria": "Superstiti", "Anno_decorrenza": 2022, "Numero_pensioni": 249620.0}, {"Categoria": "Superstiti", "Anno_decorrenza": 2023, "Numero_pensioni": 224206.0}, {"Categoria": "Superstiti", "Anno_decorrenza": 2024, "Numero_pensioni": 48978.0}, {"Categoria": "Vecchiaia", "Anno_decorrenza": 2020, "Numero_pensioni": 281209.0}, {"Categoria": "Vecchiaia", "Anno_decorrenza": 2021, "Numero_pensioni": 297986.0}, {"Categoria": "Vecchiaia", "Anno_decorrenza": 2022, "Numero_pensioni": 310767.0}, {"Categoria": "Vecchiaia", "Anno_decorrenza": 2023, "Numero_pensioni": 312878.0}, {"Categoria": "Vecchiaia", "Anno_decorrenza": 2024, "Numero_pensioni": 72829.0}], "importo": [{"classe_importo": "1.000,00 - 1.499,99", "Anno_decorrenza": 2020, "Numero_pensioni": 133997.0}, {"classe_importo": "1.000,00 - 1.499,99", "Anno_decorrenza": 2021, "Numero_pensioni": 143606.0}, {"classe_importo": "1.000,00 - 1.499,99", "Anno_decorrenza": 2022, "Numero_pensioni": 141105.0}, {"classe_importo": "1.000,00 - 1.499,99", "Anno_decorrenza": 2023, "Numero_pensioni": 139558.0}, {"classe_importo": "1.000,00 - 1.499,99", "Anno_decorrenza": 2024, "Numero_pensioni": 32894.0}, {"classe_importo": "1.500,00 - 1.999,99", "Anno_decorrenza": 2020, "Numero_pensioni": 97739.0}, {"classe_importo": "1.500,00 - 1.999,99", "Anno_decorrenza": 2021, "Numero_pensioni": 98183.0}, {"classe_importo": "1.500,00 - 1.999,99", "Anno_decorrenza": 2022, "Numero_pensioni": 93204.0}, {"classe_importo": "1.500,00 - 1.999,99", "Anno_decorrenza": 2023, "Numero_pensioni": 94596.0}, {"classe_importo": "1.500,00 - 1.999,99", "Anno_decorrenza": 2024, "Numero_pensioni": 24208.0}, {"classe_importo": "2.000,00 - 2.999,99", "Anno_decorrenza": 2020, "Numero_pensioni": 137942.0}, {"classe_importo": "2.000,00 - 2.999,99", "Anno_decorrenza": 2021, "Numero_pensioni": 127532.0}, {"classe_importo": "2.000,00 - 2.999,99", "Anno_decorrenza": 2022, "Numero_pensioni": 103674.0}, {"classe_importo": "2.000,00 - 2.999,99", "Anno_decorrenza": 2023, "Numero_pensioni": 94219.0}, {"classe_importo": "2.000,00 - 2.999,99", "Anno_decorrenza": 2024, "Numero_pensioni": 20463.0}, {"classe_importo": "3.000,00 e piu'", "Anno_decorrenza": 2020, "Numero_pensioni": 52739.0}, {"classe_importo": "3.000,00 e piu'", "Anno_decorrenza": 2021, "Numero_pensioni": 47061.0}, {"classe_importo": "3.000,00 e piu'", "Anno_decorrenza": 2022, "Numero_pensioni": 43635.0}, {"classe_importo": "3.000,00 e piu'", "Anno_decorrenza": 2023, "Numero_pensioni": 41332.0}, {"classe_importo": "3.000,00 e piu'", "Anno_decorrenza": 2024, "Numero_pensioni": 9561.0}, {"classe_importo": "500,00 - 999,99", "Anno_decorrenza": 2020, "Numero_pensioni": 270298.0}, {"classe_importo": "500,00 - 999,99", "Anno_decorrenza": 2021, "Numero_pensioni": 289764.0}, {"classe_importo": "500,00 - 999,99", "Anno_decorrenza": 2022, "Numero_pensioni": 289244.0}, {"classe_importo": "500,00 - 999,99", "Anno_decorrenza": 2023, "Numero_pensioni": 286832.0}, {"classe_importo": "500,00 - 999,99", "Anno_decorrenza": 2024, "Numero_pensioni": 65188.0}, {"classe_importo": "Fino a 499,99", "Anno_decorrenza": 2020, "Numero_pensioni": 196586.0}, {"classe_importo": "Fino a 499,99", "Anno_decorrenza": 2021, "Numero_pensioni": 203155.0}, {"classe_importo": "Fino a 499,99", "Anno_decorrenza": 2022, "Numero_pensioni": 204940.0}, {"classe_importo": "Fino a 499,99", "Anno_decorrenza": 2023, "Numero_pensioni": 162699.0}, {"classe_importo": "Fino a 499,99", "Anno_decorrenza": 2024, "Numero_pensioni": 34909.0}], "eta": [{"classe_eta": "55 - 59", "Anno_decorrenza": 2020, "Numero_pensioni": 93290.0}, {"classe_eta": "55 - 59", "Anno_decorrenza": 2021, "Numero_pensioni": 96907.0}, {"classe_eta": "55 - 59", "Anno_decorrenza": 2022, "Numero_pensioni": 99064.0}, {"classe_eta": "55 - 59", "Anno_decorrenza": 2023, "Numero_pensioni": 87369.0}, {"classe_eta": "55 - 59", "Anno_decorrenza": 2024, "Numero_pensioni": 20805.0}, {"classe_eta": "60 - 64", "Anno_decorrenza": 2020, "Numero_pensioni": 229584.0}, {"classe_eta": "60 - 64", "Anno_decorrenza": 2021, "Numero_pensioni": 233704.0}, {"classe_eta": "60 - 64", "Anno_decorrenza": 2022, "Numero_pensioni": 196968.0}, {"classe_eta": "60 - 64", "Anno_decorrenza": 2023, "Numero_pensioni": 178306.0}, {"classe_eta": "60 - 64", "Anno_decorrenza": 2024, "Numero_pensioni": 42099.0}, {"classe_eta": "65 - 67", "Anno_decorrenza": 2020, "Numero_pensioni": 302156.0}, {"classe_eta": "65 - 67", "Anno_decorrenza": 2021, "Numero_pensioni": 309096.0}, {"classe_eta": "65 - 67", "Anno_decorrenza": 2022, "Numero_pensioni": 311558.0}, {"classe_eta": "65 - 67", "Anno_decorrenza": 2023, "Numero_pensioni": 301449.0}, {"classe_eta": "65 - 67", "Anno_decorrenza": 2024, "Numero_pensioni": 67422.0}, {"classe_eta": "68 e oltre", "Anno_decorrenza": 2020, "Numero_pensioni": 224088.0}, {"classe_eta": "68 e oltre", "Anno_decorrenza": 2021, "Numero_pensioni": 227453.0}, {"classe_eta": "68 e oltre", "Anno_decorrenza": 2022, "Numero_pensioni": 229547.0}, {"classe_eta": "68 e oltre", "Anno_decorrenza": 2023, "Numero_pensioni": 217597.0}, {"classe_eta": "68 e oltre", "Anno_decorrenza": 2024, "Numero_pensioni": 51239.0}, {"classe_eta": "Fino a 54", "Anno_decorrenza": 2020, "Numero_pensioni": 40183.0}, {"classe_eta": "Fino a 54", "Anno_decorrenza": 2021, "Numero_pensioni": 42141.0}, {"classe_eta": "Fino a 54", "Anno_decorrenza": 2022, "Numero_pensioni": 38665.0}, {"classe_eta": "Fino a 54", "Anno_decorrenza": 2023, "Numero_pensioni": 34515.0}, {"classe_eta": "Fino a 54", "Anno_decorrenza": 2024, "Numero_pensioni": 5658.0}], "sesso": [{"SESSO": "Femmine", "Anno_decorrenza": 2020, "Numero_pensioni": 487867.0}, {"SESSO": "Femmine", "Anno_decorrenza": 2021, "Numero_pensioni": 506750.0}, {"SESSO": "Femmine", "Anno_decorrenza": 2022, "Numero_pensioni": 490341.0}, {"SESSO": "Femmine", "Anno_decorrenza": 2023, "Numero_pensioni": 443910.0}, {"SESSO": "Femmine", "Anno_decorrenza": 2024, "Numero_pensioni": 97876.0}, {"SESSO": "Maschi", "Anno_decorrenza": 2020, "Numero_pensioni": 401434.0}, {"SESSO": "Maschi", "Anno_decorrenza": 2021, "Numero_pensioni": 402551.0}, {"SESSO": "Maschi", "Anno_decorrenza": 2022, "Numero_pensioni": 385461.0}, {"SESSO": "Maschi", "Anno_decorrenza": 2023, "Numero_pensioni": 375326.0}, {"SESSO": "Maschi", "Anno_decorrenza": 2024, "Numero_pensioni": 89347.0}], "area": [{"area_geografica": "Centro", "Anno_decorrenza": 2020, "Numero_pensioni": 173846.0}, {"area_geografica": "Centro", "Anno_decorrenza": 2021, "Numero_pensioni": 180585.0}, {"area_geografica": "Centro", "Anno_decorrenza": 2022, "Numero_pensioni": 174329.0}, {"area_geografica": "Centro", "Anno_decorrenza": 2023, "Numero_pensioni": 164022.0}, {"area_geografica": "Centro", "Anno_decorrenza": 2024, "Numero_pensioni": 36787.0}, {"area_geografica": "Nord Est", "Anno_decorrenza": 2020, "Numero_pensioni": 179289.0}, {"area_geografica": "Nord Est", "Anno_decorrenza": 2021, "Numero_pensioni": 186021.0}, {"area_geografica": "Nord Est", "Anno_decorrenza": 2022, "Numero_pensioni": 179661.0}, {"area_geografica": "Nord Est", "Anno_decorrenza": 2023, "Numero_pensioni": 171163.0}, {"area_geografica": "Nord Est", "Anno_decorrenza": 2024, "Numero_pensioni": 39079.0}, {"area_geografica": "Nord Ovest", "Anno_decorrenza": 2020, "Numero_pensioni": 250881.0}, {"area_geografica": "Nord Ovest", "Anno_decorrenza": 2021, "Numero_pensioni": 247157.0}, {"area_geografica": "Nord Ovest", "Anno_decorrenza": 2022, "Numero_pensioni": 240001.0}, {"area_geografica": "Nord Ovest", "Anno_decorrenza": 2023, "Numero_pensioni": 224526.0}, {"area_geografica": "Nord Ovest", "Anno_decorrenza": 2024, "Numero_pensioni": 53269.0}, {"area_geografica": "Sud e Isole", "Anno_decorrenza": 2020, "Numero_pensioni": 285285.0}, {"area_geografica": "Sud e Isole", "Anno_decorrenza": 2021, "Numero_pensioni": 295538.0}, {"area_geografica": "Sud e Isole", "Anno_decorrenza": 2022, "Numero_pensioni": 281811.0}, {"area_geografica": "Sud e Isole", "Anno_decorrenza": 2023, "Numero_pensioni": 259525.0}, {"area_geografica": "Sud e Isole", "Anno_decorrenza": 2024, "Numero_pensioni": 58088.0}], "gestione": [{"tgestio": "Assegni Sociali", "Anno_decorrenza": 2020, "Numero_pensioni": 74060.0}, {"tgestio": "Assegni Sociali", "Anno_decorrenza": 2021, "Numero_pensioni": 81007.0}, {"tgestio": "Assegni Sociali", "Anno_decorrenza": 2022, "Numero_pensioni": 88246.0}, {"tgestio": "Assegni Sociali", "Anno_decorrenza": 2023, "Numero_pensioni": 90189.0}, {"tgestio": "Assegni Sociali", "Anno_decorrenza": 2024, "Numero_pensioni": 24955.0}, {"tgestio": "Autonomi (compresi i Parasubordinati)", "Anno_decorrenza": 2020, "Numero_pensioni": 260731.0}, {"tgestio": "Autonomi (compresi i Parasubordinati)", "Anno_decorrenza": 2021, "Numero_pensioni": 264058.0}, {"tgestio": "Autonomi (compresi i Parasubordinati)", "Anno_decorrenza": 2022, "Numero_pensioni": 257947.0}, {"tgestio": "Autonomi (compresi i Parasubordinati)", "Anno_decorrenza": 2023, "Numero_pensioni": 248676.0}, {"tgestio": "Autonomi (compresi i Parasubordinati)", "Anno_decorrenza": 2024, "Numero_pensioni": 57332.0}, {"tgestio": "FPLD comprese le gestioni a contabilità separata", "Anno_decorrenza": 2020, "Numero_pensioni": 379128.0}, {"tgestio": "FPLD comprese le gestioni a contabilità separata", "Anno_decorrenza": 2021, "Numero_pensioni": 394694.0}, {"tgestio": "FPLD comprese le gestioni a contabilità separata", "Anno_decorrenza": 2022, "Numero_pensioni": 380631.0}, {"tgestio": "FPLD comprese le gestioni a contabilità separata", "Anno_decorrenza": 2023, "Numero_pensioni": 350948.0}, {"tgestio": "FPLD comprese le gestioni a contabilità separata", "Anno_decorrenza": 2024, "Numero_pensioni": 86031.0}, {"tgestio": "Gestione Dipendenti Pubblici", "Anno_decorrenza": 2020, "Numero_pensioni": 175382.0}, {"tgestio": "Gestione Dipendenti Pubblici", "Anno_decorrenza": 2021, "Numero_pensioni": 169542.0}, {"tgestio": "Gestione Dipendenti Pubblici", "Anno_decorrenza": 2022, "Numero_pensioni": 148978.0}, {"tgestio": "Gestione Dipendenti Pubblici", "Anno_decorrenza": 2023, "Numero_pensioni": 129423.0}, {"tgestio": "Gestione Dipendenti Pubblici", "Anno_decorrenza": 2024, "Numero_pensioni": 18905.0}], "sesso_cat": [{"SESSO": "Femmine", "Categoria": "Anticipata", "Anno_decorrenza": 2020, "Numero_pensioni": 118415.0}, {"SESSO": "Femmine", "Categoria": "Anticipata", "Anno_decorrenza": 2021, "Numero_pensioni": 122227.0}, {"SESSO": "Femmine", "Categoria": "Anticipata", "Anno_decorrenza": 2022, "Numero_pensioni": 107545.0}, {"SESSO": "Femmine", "Categoria": "Anticipata", "Anno_decorrenza": 2023, "Numero_pensioni": 79357.0}, {"SESSO": "Femmine", "Categoria": "Anticipata", "Anno_decorrenza": 2024, "Numero_pensioni": 16588.0}, {"SESSO": "Femmine", "Categoria": "Invalidita'", "Anno_decorrenza": 2020, "Numero_pensioni": 17029.0}, {"SESSO": "Femmine", "Categoria": "Invalidita'", "Anno_decorrenza": 2021, "Numero_pensioni": 20216.0}, {"SESSO": "Femmine", "Categoria": "Invalidita'", "Anno_decorrenza": 2022, "Numero_pensioni": 19581.0}, {"SESSO": "Femmine", "Categoria": "Invalidita'", "Anno_decorrenza": 2023, "Numero_pensioni": 19556.0}, {"SESSO": "Femmine", "Categoria": "Invalidita'", "Anno_decorrenza": 2024, "Numero_pensioni": 3243.0}, {"SESSO": "Femmine", "Categoria": "Superstiti", "Anno_decorrenza": 2020, "Numero_pensioni": 211098.0}, {"SESSO": "Femmine", "Categoria": "Superstiti", "Anno_decorrenza": 2021, "Numero_pensioni": 209273.0}, {"SESSO": "Femmine", "Categoria": "Superstiti", "Anno_decorrenza": 2022, "Numero_pensioni": 201630.0}, {"SESSO": "Femmine", "Categoria": "Superstiti", "Anno_decorrenza": 2023, "Numero_pensioni": 180912.0}, {"SESSO": "Femmine", "Categoria": "Superstiti", "Anno_decorrenza": 2024, "Numero_pensioni": 40469.0}, {"SESSO": "Femmine", "Categoria": "Vecchiaia", "Anno_decorrenza": 2020, "Numero_pensioni": 141325.0}, {"SESSO": "Femmine", "Categoria": "Vecchiaia", "Anno_decorrenza": 2021, "Numero_pensioni": 155034.0}, {"SESSO": "Femmine", "Categoria": "Vecchiaia", "Anno_decorrenza": 2022, "Numero_pensioni": 161585.0}, {"SESSO": "Femmine", "Categoria": "Vecchiaia", "Anno_decorrenza": 2023, "Numero_pensioni": 164085.0}, {"SESSO": "Femmine", "Categoria": "Vecchiaia", "Anno_decorrenza": 2024, "Numero_pensioni": 37576.0}, {"SESSO": "Maschi", "Categoria": "Anticipata", "Anno_decorrenza": 2020, "Numero_pensioni": 181550.0}, {"SESSO": "Maschi", "Categoria": "Anticipata", "Anno_decorrenza": 2021, "Numero_pensioni": 175514.0}, {"SESSO": "Maschi", "Categoria": "Anticipata", "Anno_decorrenza": 2022, "Numero_pensioni": 152872.0}, {"SESSO": "Maschi", "Categoria": "Anticipata", "Anno_decorrenza": 2023, "Numero_pensioni": 148282.0}, {"SESSO": "Maschi", "Categoria": "Anticipata", "Anno_decorrenza": 2024, "Numero_pensioni": 40072.0}, {"SESSO": "Maschi", "Categoria": "Invalidita'", "Anno_decorrenza": 2020, "Numero_pensioni": 31681.0}, {"SESSO": "Maschi", "Categoria": "Invalidita'", "Anno_decorrenza": 2021, "Numero_pensioni": 35178.0}, {"SESSO": "Maschi", "Categoria": "Invalidita'", "Anno_decorrenza": 2022, "Numero_pensioni": 35417.0}, {"SESSO": "Maschi", "Categoria": "Invalidita'", "Anno_decorrenza": 2023, "Numero_pensioni": 34957.0}, {"SESSO": "Maschi", "Categoria": "Invalidita'", "Anno_decorrenza": 2024, "Numero_pensioni": 5513.0}, {"SESSO": "Maschi", "Categoria": "Superstiti", "Anno_decorrenza": 2020, "Numero_pensioni": 48319.0}, {"SESSO": "Maschi", "Categoria": "Superstiti", "Anno_decorrenza": 2021, "Numero_pensioni": 48907.0}, {"SESSO": "Maschi", "Categoria": "Superstiti", "Anno_decorrenza": 2022, "Numero_pensioni": 47990.0}, {"SESSO": "Maschi", "Categoria": "Superstiti", "Anno_decorrenza": 2023, "Numero_pensioni": 43294.0}, {"SESSO": "Maschi", "Categoria": "Superstiti", "Anno_decorrenza": 2024, "Numero_pensioni": 8509.0}, {"SESSO": "Maschi", "Categoria": "Vecchiaia", "Anno_decorrenza": 2020, "Numero_pensioni": 139884.0}, {"SESSO": "Maschi", "Categoria": "Vecchiaia", "Anno_decorrenza": 2021, "Numero_pensioni": 142952.0}, {"SESSO": "Maschi", "Categoria": "Vecchiaia", "Anno_decorrenza": 2022, "Numero_pensioni": 149182.0}, {"SESSO": "Maschi", "Categoria": "Vecchiaia", "Anno_decorrenza": 2023, "Numero_pensioni": 148793.0}, {"SESSO": "Maschi", "Categoria": "Vecchiaia", "Anno_decorrenza": 2024, "Numero_pensioni": 35253.0}], "regione_area": [{"Regione": "Abruzzo", "area_geografica": "Sud e Isole", "Numero_pensioni": 82649.0}, {"Regione": "Basilicata", "area_geografica": "Sud e Isole", "Numero_pensioni": 36802.0}, {"Regione": "Calabria", "area_geografica": "Sud e Isole", "Numero_pensioni": 125225.0}, {"Regione": "Campania", "area_geografica": "Sud e Isole", "Numero_pensioni": 300763.0}, {"Regione": "Emilia Romagna", "area_geografica": "Nord Est", "Numero_pensioni": 297616.0}, {"Regione": "Friuli Venezia Giulia", "area_geografica": "Nord Est", "Numero_pensioni": 81298.0}, {"Regione": "Lazio", "area_geografica": "Centro", "Numero_pensioni": 312444.0}, {"Regione": "Liguria", "area_geografica": "Nord Ovest", "Numero_pensioni": 103414.0}, {"Regione": "Lombardia", "area_geografica": "Nord Ovest", "Numero_pensioni": 623860.0}, {"Regione": "Marche", "area_geografica": "Centro", "Numero_pensioni": 106502.0}, {"Regione": "Molise", "area_geografica": "Sud e Isole", "Numero_pensioni": 21886.0}, {"Regione": "Piemonte e Valle d'Aosta", "area_geografica": "Nord Ovest", "Numero_pensioni": 288560.0}, {"Regione": "Puglia", "area_geografica": "Sud e Isole", "Numero_pensioni": 247690.0}, {"Regione": "Sardegna", "area_geografica": "Sud e Isole", "Numero_pensioni": 95026.0}, {"Regione": "Sicilia", "area_geografica": "Sud e Isole", "Numero_pensioni": 270206.0}, {"Regione": "Toscana", "area_geografica": "Centro", "Numero_pensioni": 234223.0}, {"Regione": "Trentino Alto Adige", "area_geografica": "Nord Est", "Numero_pensioni": 68147.0}, {"Regione": "Umbria", "area_geografica": "Centro", "Numero_pensioni": 76400.0}, {"Regione": "Veneto", "area_geografica": "Nord Est", "Numero_pensioni": 308152.0}], "meta": {"anni": [2020, 2021, 2022, 2023, 2024], "trimestri": ["I trimestre", "II trimestre", "III trimestre", "IV trimestre"], "regioni": ["Abruzzo", "Basilicata", "Calabria", "Campania", "Emilia Romagna", "Friuli Venezia Giulia", "Lazio", "Liguria", "Lombardia", "Marche", "Molise", "Piemonte e Valle d'Aosta", "Puglia", "Sardegna", "Sicilia", "Toscana", "Trentino Alto Adige", "Umbria", "Veneto"], "categorie": ["Anticipata", "Invalidita'", "Superstiti", "Vecchiaia"], "importo_order": ["Fino a 499,99", "500,00 - 999,99", "1.000,00 - 1.499,99", "1.500,00 - 1.999,99", "2.000,00 - 2.999,99", "3.000,00 e piu'"], "eta_order": ["Fino a 54", "55 - 59", "60 - 64", "65 - 67", "68 e oltre"], "aree": ["Centro", "Nord Est", "Nord Ovest", "Sud e Isole"], "gestioni": ["Assegni Sociali", "Autonomi (compresi i Parasubordinati)", "FPLD comprese le gestioni a contabilità separata", "Gestione Dipendenti Pubblici"]}, "analysis": {"importo_area": {"Centro": {"2020": {"1.000,00 - 1.499,99": 14.93, "1.500,00 - 1.999,99": 10.45, "2.000,00 - 2.999,99": 15.63, "3.000,00 e piu'": 6.75, "500,00 - 999,99": 28.45, "Fino a 499,99": 23.8}, "2021": {"1.000,00 - 1.499,99": 15.59, "1.500,00 - 1.999,99": 10.05, "2.000,00 - 2.999,99": 14.22, "3.000,00 e piu'": 6.12, "500,00 - 999,99": 29.94, "Fino a 499,99": 24.09}, "2022": {"1.000,00 - 1.499,99": 15.47, "1.500,00 - 1.999,99": 9.75, "2.000,00 - 2.999,99": 12.3, "3.000,00 e piu'": 6.05, "500,00 - 999,99": 31.12, "Fino a 499,99": 25.31}, "2023": {"1.000,00 - 1.499,99": 16.36, "1.500,00 - 1.999,99": 10.69, "2.000,00 - 2.999,99": 11.31, "3.000,00 e piu'": 6.08, "500,00 - 999,99": 33.45, "Fino a 499,99": 22.11}, "2024": {"1.000,00 - 1.499,99": 17.09, "1.500,00 - 1.999,99": 12.11, "2.000,00 - 2.999,99": 10.75, "3.000,00 e piu'": 5.81, "500,00 - 999,99": 34.11, "Fino a 499,99": 20.13}}, "Nord Est": {"2020": {"1.000,00 - 1.499,99": 17.14, "1.500,00 - 1.999,99": 13.32, "2.000,00 - 2.999,99": 16.11, "3.000,00 e piu'": 6.54, "500,00 - 999,99": 28.37, "Fino a 499,99": 18.52}, "2021": {"1.000,00 - 1.499,99": 18.23, "1.500,00 - 1.999,99": 13.15, "2.000,00 - 2.999,99": 14.43, "3.000,00 e piu'": 5.26, "500,00 - 999,99": 30.37, "Fino a 499,99": 18.57}, "2022": {"1.000,00 - 1.499,99": 18.8, "1.500,00 - 1.999,99": 13.22, "2.000,00 - 2.999,99": 12.54, "3.000,00 e piu'": 4.92, "500,00 - 999,99": 31.54, "Fino a 499,99": 18.97}, "2023": {"1.000,00 - 1.499,99": 19.36, "1.500,00 - 1.999,99": 14.17, "2.000,00 - 2.999,99": 13.02, "3.000,00 e piu'": 4.98, "500,00 - 999,99": 30.62, "Fino a 499,99": 17.85}, "2024": {"1.000,00 - 1.499,99": 20.58, "1.500,00 - 1.999,99": 16.22, "2.000,00 - 2.999,99": 12.82, "3.000,00 e piu'": 5.04, "500,00 - 999,99": 29.31, "Fino a 499,99": 16.04}}, "Nord Ovest": {"2020": {"1.000,00 - 1.499,99": 16.92, "1.500,00 - 1.999,99": 12.84, "2.000,00 - 2.999,99": 16.31, "3.000,00 e piu'": 7.03, "500,00 - 999,99": 28.66, "Fino a 499,99": 18.24}, "2021": {"1.000,00 - 1.499,99": 17.8, "1.500,00 - 1.999,99": 13.32, "2.000,00 - 2.999,99": 15.01, "3.000,00 e piu'": 6.24, "500,00 - 999,99": 29.41, "Fino a 499,99": 18.23}, "2022": {"1.000,00 - 1.499,99": 18.7, "1.500,00 - 1.999,99": 13.17, "2.000,00 - 2.999,99": 12.83, "3.000,00 e piu'": 5.78, "500,00 - 999,99": 30.64, "Fino a 499,99": 18.87}, "2023": {"1.000,00 - 1.499,99": 19.38, "1.500,00 - 1.999,99": 14.39, "2.000,00 - 2.999,99": 13.72, "3.000,00 e piu'": 5.85, "500,00 - 999,99": 29.63, "Fino a 499,99": 17.03}, "2024": {"1.000,00 - 1.499,99": 19.79, "1.500,00 - 1.999,99": 16.05, "2.000,00 - 2.999,99": 13.88, "3.000,00 e piu'": 6.64, "500,00 - 999,99": 28.05, "Fino a 499,99": 15.59}}, "Sud e Isole": {"2020": {"1.000,00 - 1.499,99": 12.22, "1.500,00 - 1.999,99": 8.23, "2.000,00 - 2.999,99": 14.36, "3.000,00 e piu'": 4.08, "500,00 - 999,99": 34.38, "Fino a 499,99": 26.73}, "2021": {"1.000,00 - 1.499,99": 12.71, "1.500,00 - 1.999,99": 7.67, "2.000,00 - 2.999,99": 12.83, "3.000,00 e piu'": 3.66, "500,00 - 999,99": 36.04, "Fino a 499,99": 27.09}, "2022": {"1.000,00 - 1.499,99": 12.59, "1.500,00 - 1.999,99": 7.39, "2.000,00 - 2.999,99": 10.26, "3.000,00 e piu'": 3.68, "500,00 - 999,99": 37.19, "Fino a 499,99": 28.9}, "2023": {"1.000,00 - 1.499,99": 13.9, "1.500,00 - 1.999,99": 7.9, "2.000,00 - 2.999,99": 8.7, "3.000,00 e piu'": 3.74, "500,00 - 999,99": 43.55, "Fino a 499,99": 22.21}, "2024": {"1.000,00 - 1.499,99": 13.81, "1.500,00 - 1.999,99": 8.38, "2.000,00 - 2.999,99": 7.07, "3.000,00 e piu'": 3.3, "500,00 - 999,99": 45.18, "Fino a 499,99": 22.26}}}, "importo_sex": {"Femmine": {"2020": {"1.000,00 - 1.499,99": 14.94, "1.500,00 - 1.999,99": 8.34, "2.000,00 - 2.999,99": 13.2, "3.000,00 e piu'": 2.49, "500,00 - 999,99": 38.12, "Fino a 499,99": 22.91}, "2021": {"1.000,00 - 1.499,99": 15.49, "1.500,00 - 1.999,99": 8.25, "2.000,00 - 2.999,99": 12.25, "3.000,00 e piu'": 2.25, "500,00 - 999,99": 38.69, "Fino a 499,99": 23.07}, "2022": {"1.000,00 - 1.499,99": 16.33, "1.500,00 - 1.999,99": 8.28, "2.000,00 - 2.999,99": 9.69, "3.000,00 e piu'": 2.29, "500,00 - 999,99": 39.54, "Fino a 499,99": 23.86}, "2023": {"1.000,00 - 1.499,99": 18.06, "1.500,00 - 1.999,99": 8.81, "2.000,00 - 2.999,99": 8.63, "3.000,00 e piu'": 2.3, "500,00 - 999,99": 40.92, "Fino a 499,99": 21.28}, "2024": {"1.000,00 - 1.499,99": 19.13, "1.500,00 - 1.999,99": 9.13, "2.000,00 - 2.999,99": 6.57, "3.000,00 e piu'": 2.24, "500,00 - 999,99": 42.18, "Fino a 499,99": 20.74}}, "Maschi": {"2020": {"1.000,00 - 1.499,99": 15.22, "1.500,00 - 1.999,99": 14.22, "2.000,00 - 2.999,99": 18.33, "3.000,00 e piu'": 10.11, "500,00 - 999,99": 21.0, "Fino a 499,99": 21.13}, "2021": {"1.000,00 - 1.499,99": 16.17, "1.500,00 - 1.999,99": 14.0, "2.000,00 - 2.999,99": 16.26, "3.000,00 e piu'": 8.86, "500,00 - 999,99": 23.27, "Fino a 499,99": 21.43}, "2022": {"1.000,00 - 1.499,99": 15.83, "1.500,00 - 1.999,99": 13.65, "2.000,00 - 2.999,99": 14.56, "3.000,00 e piu'": 8.4, "500,00 - 999,99": 24.74, "Fino a 499,99": 22.82}, "2023": {"1.000,00 - 1.499,99": 15.83, "1.500,00 - 1.999,99": 14.79, "2.000,00 - 2.999,99": 14.9, "3.000,00 e piu'": 8.29, "500,00 - 999,99": 28.02, "Fino a 499,99": 18.18}, "2024": {"1.000,00 - 1.499,99": 15.86, "1.500,00 - 1.999,99": 17.09, "2.000,00 - 2.999,99": 15.71, "3.000,00 e piu'": 8.25, "500,00 - 999,99": 26.75, "Fino a 499,99": 16.35}}}, "inflation_area": {"Nord Ovest": {"2020": -0.2, "2021": 1.7, "2022": 7.8, "2023": 5.9, "2024": 1.0}, "Nord Est": {"2020": -0.2, "2021": 2.0, "2022": 8.6, "2023": 5.4, "2024": 1.0}, "Centro": {"2020": -0.2, "2021": 1.7, "2022": 7.9, "2023": 5.7, "2024": 1.0}, "Sud e Isole": {"2020": -0.2, "2021": 2.1, "2022": 9.2, "2023": 5.6, "2024": 1.0}}}};
 
 // ──────────────────────────────────────────────────────────
 // Chart.js defaults
@@ -680,46 +770,44 @@ function update() {
   updateEta();
   updateGestione();
   updateArea();
-  updateSessoCat();
+  updateSessoCat();updateSmallMultiples();updateDivergenza();updateInflazione();updateConfrontoAree();
   updateTable();
 }
 
 // KPIs
 function updateKPIs() {
-  // Total from sesso_cat filtered
   const sc = filterSessoCat();
-  const total = sc.reduce((s, r) => s + r.Numero_pensioni, 0);
+  const total = sc.reduce((s, r) => s + (+r.Numero_pensioni||0), 0);
   document.getElementById('kpi-total').textContent = fmtFull(total);
-
-  // Best year (from trend filtered by sesso+cat)
-  const byYear = {};
-  filterSessoCat().forEach(r => {
-    byYear[r.Anno_decorrenza] = (byYear[r.Anno_decorrenza] || 0) + r.Numero_pensioni;
-  });
-  const topYear = Object.entries(byYear).sort((a,b) => b[1]-a[1])[0];
-  if (topYear) {
-    document.getElementById('kpi-top-year').textContent = topYear[0];
-    document.getElementById('kpi-top-year-sub').textContent = fmtFull(topYear[1]) + ' pensioni';
-  }
-
-  // Best region
-  const regFiltered = applyFilters(DATA.regione, { anno: 'Anno_decorrenza' });
-  const byReg = sumBy(regFiltered, r => r.Regione);
+  const byReg = sumBy(applyFilters(DATA.regione, {anno:'Anno_decorrenza'}), r => r.Regione);
   const topReg = Object.entries(byReg).sort((a,b) => b[1]-a[1])[0];
-  if (topReg) {
-    document.getElementById('kpi-top-reg').textContent = topReg[0];
-    document.getElementById('kpi-top-reg-sub').textContent = fmtFull(topReg[1]) + ' pensioni';
-  }
-
-  // Best category
-  const byCat = sumBy(filterSessoCat(), r => r.Categoria);
+  if(topReg){ document.getElementById('kpi-top-reg').textContent = topReg[0]; document.getElementById('kpi-top-reg-sub').textContent = fmtFull(topReg[1]) + ' pensioni'; }
+  const byCat = sumBy(sc, r => r.Categoria);
   const topCat = Object.entries(byCat).sort((a,b) => b[1]-a[1])[0];
-  if (topCat) {
-    document.getElementById('kpi-top-cat').textContent = topCat[0];
-    document.getElementById('kpi-top-cat-sub').textContent = fmt(topCat[1]) + ' · ' + Math.round(topCat[1]/total*100) + '%';
+  if(topCat && total>0){ document.getElementById('kpi-top-cat').textContent = topCat[0]; document.getElementById('kpi-top-cat-sub').textContent = fmt(topCat[1]) + ' · ' + Math.round(topCat[1]/total*100) + '%'; }
+  const kpi2El = document.getElementById('kpi2-label');
+  if(state.anno === 'all'){
+    if(kpi2El) kpi2El.textContent = 'Anno con più pensioni';
+    const byY = sumBy(sc, r => r.Anno_decorrenza);
+    const topY = Object.entries(byY).sort((a,b) => b[1]-a[1])[0];
+    if(topY){ document.getElementById('kpi-top-year').textContent = topY[0]; document.getElementById('kpi-top-year-sub').textContent = fmtFull(topY[1]) + ' pensioni'; }
+  } else {
+    if(kpi2El) kpi2El.textContent = 'Variazione vs anno prec.';
+    const prev = parseInt(state.anno) - 1;
+    const scP = DATA.sesso_cat.filter(r => r.Anno_decorrenza==prev && (state.sesso==='all'||r.SESSO===state.sesso) && (state.cat==='all'||r.Categoria===state.cat));
+    const prevTotal = scP.reduce((s,r) => s+(+r.Numero_pensioni||0), 0);
+    if(prevTotal > 0){
+      const pct = (total - prevTotal) / prevTotal * 100;
+      const sign = pct >= 0 ? '+' : '';
+      const col = pct >= 0 ? 'var(--teal)' : 'var(--red)';
+      document.getElementById('kpi-top-year').innerHTML = `<span style="color:${col}">${sign}${pct.toFixed(1)}%</span>`;
+      document.getElementById('kpi-top-year-sub').textContent = `vs ${prev} · ${fmtFull(prevTotal)}`;
+    } else {
+      document.getElementById('kpi-top-year').textContent = '—';
+      document.getElementById('kpi-top-year-sub').textContent = 'nessun dato anno prec.';
+    }
   }
 }
-
 // Gender bar
 function updateGenderBar() {
   const sc = filterSessoCat(true); // exclude sesso filter
@@ -738,66 +826,42 @@ function updateGenderBar() {
 // Trend
 function updateTrend() {
   const quarterOrder = ['I trimestre','II trimestre','III trimestre','IV trimestre'];
-  const anni = DATA.meta.anni;
-  const labels = [];
-  anni.forEach(a => quarterOrder.forEach(q => labels.push(`${q.split(' ')[0]} ${a}`)));
-
-  // We aggregate sesso_cat by Anno+Trimestre via trend data
-  // trend has Anno+Trimestrale but no sesso/cat breakdown → use it if no sesso/cat filter
-  // otherwise fall back to sesso data (approximation)
-  let pointsMap = {};
-  if (state.sesso === 'all' && state.cat === 'all') {
-    DATA.trend.forEach(r => {
-      if (state.anno !== 'all' && r.Anno_decorrenza != state.anno) return;
-      const k = `${r.Trimestrale}_${r.Anno_decorrenza}`;
-      pointsMap[k] = (pointsMap[k] || 0) + r.Numero_pensioni;
-    });
-  } else {
-    // Approximate: use sesso + distribute evenly across quarters (best we can with available aggregations)
-    // Use sesso data per anno, divide by 4
-    const filtSesso = applyFilters(DATA.sesso, { anno: 'Anno_decorrenza', sesso: 'SESSO' });
-    const byAnno = sumBy(filtSesso, r => r.Anno_decorrenza);
-    quarterOrder.forEach(q => {
-      Object.entries(byAnno).forEach(([a, v]) => {
-        const k = `${q}_${a}`;
-        pointsMap[k] = (v / 4);
-      });
-    });
-  }
-
-  // Only include quarter-year combos that actually exist in the dataset (non-zero)
-  const validCombos = new Set(DATA.trend.filter(r => r.Numero_pensioni > 0).map(r => `${r.Trimestrale}_${r.Anno_decorrenza}`));
-
+  const validCombos = new Set(DATA.trend.filter(r => (+r.Numero_pensioni||0) > 0).map(r => r.Trimestrale+'_'+r.Anno_decorrenza));
+  const pMap = {};
+  DATA.trend.forEach(r => {
+    if(state.anno !== 'all' && r.Anno_decorrenza != state.anno) return;
+    const k = r.Trimestrale+'_'+r.Anno_decorrenza;
+    pMap[k] = (pMap[k]||0) + (+r.Numero_pensioni||0);
+  });
   const points = [];
-  anni.forEach(a => quarterOrder.forEach(q => {
-    if (state.anno !== 'all' && a != state.anno) return;
-    const key = `${q}_${a}`;
-    if (!validCombos.has(key)) return; // skip quarters with no real data
-    points.push({ label: `${q.split(' ')[0]} ${a}`, v: pointsMap[key] || 0 });
+  DATA.meta.anni.forEach(a => quarterOrder.forEach(q => {
+    if(state.anno !== 'all' && a != state.anno) return;
+    if(!validCombos.has(q+'_'+a)) return;
+    const curr = pMap[q+'_'+a]||0;
+    const prevKey = q+'_'+(a-1);
+    const prev = validCombos.has(prevKey) ? (pMap[prevKey]||0) : null;
+    points.push({label: q.split(' ')[0]+' '+a, v: curr, prev, a});
   }));
-
   makeChart('chart-trend', 'line', {
     labels: points.map(p => p.label),
-    datasets: [{
-      data: points.map(p => p.v),
-      borderColor: GOLD,
-      backgroundColor: 'rgba(201,168,76,0.08)',
-      fill: true,
-      tension: 0.4,
-      pointRadius: 3,
-      pointBackgroundColor: GOLD,
-      borderWidth: 2,
-    }]
+    datasets: [{ data: points.map(p => p.v), borderColor: GOLD, backgroundColor: 'rgba(201,168,76,0.08)', fill: true, tension: .4, pointRadius: 3, pointBackgroundColor: GOLD, borderWidth: 2 }]
   }, {
-    scales: {
-      x: { grid: { color: 'rgba(37,45,69,0.5)' }, ticks: { maxRotation: 45, font: { size: 9 } } },
-      y: { grid: { color: 'rgba(37,45,69,0.5)' }, ticks: { callback: v => fmt(v) } }
-    },
-    tooltipCb: { label: ctx => ' ' + fmtFull(ctx.raw) + ' pensioni' }
+    scales: { x:{grid:{color:'rgba(37,45,69,0.4)'},ticks:{maxRotation:45,font:{size:9}}}, y:{grid:{color:'rgba(37,45,69,0.4)'},ticks:{callback:v=>fmt(v)}} },
+    tooltipCb: {
+      title: ctx => ctx[0].label,
+      label: ctx => {
+        const pt = points[ctx.dataIndex];
+        let s = ' '+fmtFull(pt.v)+' pensioni';
+        if(pt.prev !== null && pt.prev > 0) {
+          const d = (pt.v - pt.prev) / pt.prev * 100;
+          s += '   ' + (d>=0 ? '▲' : '▼') + ' ' + Math.abs(d).toFixed(1) + '% vs ' + (pt.a-1);
+        }
+        return s;
+      }
+    }
   });
 }
 
-// Regione
 function updateRegione() {
   const filtered = applyFilters(DATA.regione, { anno: 'Anno_decorrenza' });
   const byReg = sumBy(filtered, r => r.Regione);
@@ -850,27 +914,21 @@ function updateCategoria() {
 
 // Importo
 function updateImporto() {
+  const cls = DATA.meta.importo_order;
+  const shortCls = cls.map(l => l.replace("3.000,00 e piu'","≥3k€").replace("Fino a 499,99","<500€").replace("500,00 - 999,99","500-1k€").replace("1.000,00 - 1.499,99","1k-1.5k€").replace("1.500,00 - 1.999,99","1.5k-2k€").replace("2.000,00 - 2.999,99","2k-3k€"));
   const filtered = applyFilters(DATA.importo, { anno: 'Anno_decorrenza' });
-  const byI = sumBy(filtered, r => r.classe_importo);
-  const labels = DATA.meta.importo_order;
-  const vals = labels.map(l => byI[l] || 0);
-  makeChart('chart-importo', 'bar', {
-    labels: labels.map(l => l.replace("3.000,00 e piu'", "3.000+ €")),
-    datasets: [{
-      data: vals,
-      backgroundColor: vals.map((v, i) => {
-        const alpha = 0.3 + (i / (labels.length - 1)) * 0.7;
-        return `rgba(201,168,76,${alpha})`;
-      }),
-      borderColor: 'transparent',
-      borderRadius: 3,
-    }]
-  }, {
-    scales: {
-      x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 30 } },
-      y: { grid: { color: 'rgba(37,45,69,0.5)' }, ticks: { callback: v => fmt(v) } }
-    },
-    tooltipCb: { label: ctx => ' ' + fmtFull(ctx.raw) + ' pensioni' }
+  const byYC = {};
+  filtered.forEach(r => { const y = r.Anno_decorrenza; if(!byYC[y]) byYC[y]={}; byYC[y][r.classe_importo] = (byYC[y][r.classe_importo]||0) + (+r.Numero_pensioni||0); });
+  const usedAnni = state.anno === 'all' ? DATA.meta.anni : [parseInt(state.anno)];
+  const IMP_COL = ['rgba(247,118,142,0.8)','rgba(91,141,239,0.65)','rgba(201,168,76,0.45)','rgba(201,168,76,0.65)',GOLD,'rgba(232,201,110,0.95)'];
+  const datasets = cls.map((c, i) => ({
+    label: shortCls[i],
+    data: usedAnni.map(a => { const yr = byYC[a]||{}; const tot = Object.values(yr).reduce((s,v)=>s+v,0); return tot>0 ? +((yr[c]||0)/tot*100).toFixed(1) : 0; }),
+    backgroundColor: IMP_COL[i], borderColor: 'transparent', borderRadius: 2
+  }));
+  makeChart('chart-importo', 'bar', { labels: usedAnni.map(String), datasets }, {
+    extra: { plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 10, padding: 8, font:{size:10} } } }, scales: { x: { stacked: true, grid:{display:false} }, y: { stacked: true, max: 100, ticks: { callback: v => v+'%' }, grid: { color: 'rgba(37,45,69,0.5)' } } } },
+    tooltipCb: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}%` }
   });
 }
 
@@ -995,6 +1053,87 @@ function updateTable() {
 }
 
 // Init
+
+function updateSmallMultiples() {
+  const sc = filterSessoCat(false, true);
+  const cats = DATA.meta.categorie;
+  const CAT_COL = {'Vecchiaia':GOLD,"Anticipata":BLUE,"Invalidita'":ROSE,'Superstiti':TEAL};
+  const el = document.getElementById('small-multiples-sm');
+  if(!el) return;
+  el.className = 'sm-grid';
+  el.innerHTML = cats.map(cat => {
+    const m = sc.filter(r => r.SESSO==='Maschi' && r.Categoria===cat).reduce((s,r)=>s+(+r.Numero_pensioni||0),0);
+    const f = sc.filter(r => r.SESSO==='Femmine' && r.Categoria===cat).reduce((s,r)=>s+(+r.Numero_pensioni||0),0);
+    const tot = m+f; const pm = tot ? Math.round(m/tot*100) : 50;
+    const col = CAT_COL[cat]||GOLD;
+    return `<div class="sm-card2"><div class="sm-cat2" style="color:${col}">${cat}</div><div class="sm-tot2">${fmt(tot)}</div><div style="font-family:'DM Mono',monospace;font-size:.63rem;color:var(--text-muted)">${fmtFull(tot)} pensioni</div><div class="sm-bw2"><div class="sm-bm2" style="width:${pm}%"></div><div class="sm-bf2" style="width:${100-pm}%"></div></div><div class="sm-leg2"><span style="color:var(--blue)">♂ ${pm}%</span><span style="color:var(--rose)">♀ ${100-pm}%</span></div></div>`;
+  }).join('');
+}
+
+function updateDivergenza() {
+  const areas = ['Nord Ovest','Nord Est','Centro','Sud e Isole'];
+  const colors = [BLUE,TEAL,GOLD,ROSE];
+  const anni = [2020,2021,2022,2023];
+  const datasets = areas.map((a,i) => ({
+    label: a,
+    data: anni.map(y => {
+      const d = DATA.analysis.importo_area[a]?.[String(y)] || {};
+      return +((d['Fino a 499,99']||0) + (d['500,00 - 999,99']||0)).toFixed(1);
+    }),
+    borderColor: colors[i], backgroundColor: colors[i]+'20',
+    fill: false, tension: .3, pointRadius: 4, borderWidth: 2
+  }));
+  makeChart('chart-divergenza','line',{labels:anni.map(String),datasets},{
+    extra:{plugins:{legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:10}}}}},
+    scales:{x:{grid:{color:'rgba(37,45,69,0.4)'}},y:{min:40,max:70,grid:{color:'rgba(37,45,69,0.4)'},ticks:{callback:v=>v+'%'}}},
+    tooltipCb:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw}%`}
+  });
+}
+
+function updateInflazione() {
+  const areas = ['Nord Ovest','Nord Est','Centro','Sud e Isole'];
+  const colors = [BLUE,TEAL,GOLD,ROSE];
+  const anno = '2022';
+  const infl = areas.map(a => DATA.analysis.inflation_area[a]?.[anno]||0);
+  const pct_low = areas.map(a => {
+    const d = DATA.analysis.importo_area[a]?.[anno]||{};
+    return +((d['Fino a 499,99']||0)+(d['500,00 - 999,99']||0)).toFixed(1);
+  });
+  makeChart('chart-inflazione','bar',{
+    labels:areas,
+    datasets:[
+      {label:'Inflazione NIC 2022 (%)',data:infl,backgroundColor:colors.map(c=>c+'80'),borderColor:colors,borderWidth:1,borderRadius:3,yAxisID:'y'},
+      {label:'Pensioni <1000€ (%)',data:pct_low,type:'line',borderColor:colors,backgroundColor:colors.map(c=>c+'30'),tension:.3,pointRadius:6,pointBackgroundColor:colors,borderWidth:2,yAxisID:'y2'}
+    ]
+  },{
+    extra:{plugins:{legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:10}}}}},
+    scales:{
+      x:{grid:{display:false}},
+      y:{position:'left',min:6,max:11,grid:{color:'rgba(37,45,69,0.4)'},ticks:{callback:v=>v+'%'},title:{display:true,text:'Inflazione %',color:'#8a8fa8',font:{size:9}}},
+      y2:{position:'right',min:40,max:70,grid:{display:false},ticks:{callback:v=>v+'%'},title:{display:true,text:'Pensioni <1000€ %',color:'#8a8fa8',font:{size:9}}}
+    },
+    tooltipCb:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw}${ctx.datasetIndex===0?'%':' %'}`}
+  });
+}
+
+function updateConfrontoAree() {
+  const areas = ['Nord Ovest','Sud e Isole'];
+  const anni = [2020,2021,2022,2023];
+  const IMP = ["Fino a 499,99","500,00 - 999,99","1.000,00 - 1.499,99","1.500,00 - 1.999,99","2.000,00 - 2.999,99","3.000,00 e piu'"];
+  const SH = ["<500€","500-1k€","1k-1.5k€","1.5k-2k€","2k-3k€","≥3k€"];
+  const COL = ['rgba(247,118,142,0.85)','rgba(247,118,142,0.5)','rgba(201,168,76,0.4)','rgba(201,168,76,0.6)','rgba(201,168,76,0.85)','rgba(232,201,110,0.95)'];
+  const labels = areas.flatMap(a => anni.map(y => (a==='Nord Ovest'?'N.Ovest':'Sud/Isole')+' '+y));
+  const datasets = IMP.map((c,i) => ({
+    label: SH[i],
+    data: areas.flatMap(a => anni.map(y => DATA.analysis.importo_area[a]?.[String(y)]?.[c]||0)),
+    backgroundColor: COL[i], borderColor: 'transparent', borderRadius: 2
+  }));
+  makeChart('chart-confronto-aree','bar',{labels,datasets},{
+    extra:{plugins:{legend:{display:true,position:'top',labels:{boxWidth:10,font:{size:9}}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:9}}},y:{stacked:true,max:100,ticks:{callback:v=>v+'%'},grid:{color:'rgba(37,45,69,0.4)'}}}},
+    tooltipCb:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw}%`}
+  });
+}
+
 update();
 </script>
 </body>
