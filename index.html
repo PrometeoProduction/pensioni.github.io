@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Osservatorio Pensioni INPS · 2020–2024</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #06080f;
+    --bg2: #0d1120;
+    --bg3: #131829;
+    --card: #181e30;
+    --border: #252d45;
+    --gold: #c9a84c;
+    --gold-light: #e8c96e;
+    --gold-dim: rgba(201,168,76,0.15);
+    --text: #e8e4d8;
+    --text-dim: #8a8fa8;
+    --text-muted: #4a5168;
+    --red: #e05252;
+    --blue: #5b8def;
+    --teal: #4ecdc4;
+    --rose: #f7768e;
+    --lavender: #9d79d6;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* HEADER */
+  header {
+    position: relative;
+    z-index: 1;
+    border-bottom: 1px solid var(--border);
+    padding: 2.5rem 3rem 2rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    background: linear-gradient(180deg, #0a0f1e 0%, transparent 100%);
+  }
+  .header-left { max-width: 600px; }
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+  }
+  header h1 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 2.4rem;
+    line-height: 1.15;
+    font-weight: 700;
+    color: var(--text);
+  }
+  header h1 em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+  header p {
+    margin-top: 0.5rem;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    font-weight: 300;
+  }
+  .header-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 0.3rem 0.8rem;
+    border-radius: 2px;
+    white-space: nowrap;
+    letter-spacing: 0.1em;
+  }
+
+  /* FILTERS BAR */
+  .filters {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(6,8,15,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 3rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .filter-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .filter-group { display: flex; align-items: center; gap: 0.6rem; }
+  select {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    background: var(--bg3);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.45rem 2.2rem 0.45rem 0.8rem;
+    border-radius: 3px;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c9a84c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.6rem center;
+    transition: border-color 0.2s;
+  }
+  select:hover { border-color: var(--gold); }
+  .reset-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.9rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: auto;
+  }
+  .reset-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* MAIN LAYOUT */
+  main {
+    position: relative;
+    z-index: 1;
+    padding: 2rem 3rem 4rem;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* KPI STRIP */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--gold);
+    padding: 1.4rem 1.6rem 1.2rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .kpi::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle at 100% 100%, var(--gold-dim), transparent 70%);
+  }
+  .kpi:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .kpi-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.8rem;
+  }
+  .kpi-value {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+  .kpi-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-top: 0.4rem;
+  }
+  .kpi-delta {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    margin-top: 0.3rem;
+  }
+  .delta-up { background: rgba(78,205,196,0.15); color: var(--teal); }
+  .delta-down { background: rgba(224,82,82,0.15); color: var(--red); }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 1.2rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2rem; margin-bottom: 1.2rem; }
+  .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 1.2rem; margin-bottom: 1.2rem; }
+  .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 1.2rem; margin-bottom: 1.2rem; }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1.6rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+  }
+  .card-subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+  .card canvas { max-height: 300px; }
+
+  /* SECTION DIVIDER */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0 1.2rem;
+  }
+  .section-divider span {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+  .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* GENDER BAR */
+  .gender-visual {
+    display: flex;
+    height: 8px;
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 0.8rem 0;
+  }
+  .gender-visual .male { background: var(--blue); }
+  .gender-visual .female { background: var(--rose); }
+  .gender-legend {
+    display: flex;
+    gap: 1.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+  }
+  .gender-legend span { display: flex; align-items: center; gap: 0.4rem; }
+  .gender-legend .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+  /* SCROLLABLE TABLE */
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 0.55rem 0.8rem; border-bottom: 1px solid rgba(37,45,69,0.5); }
+  tr:hover td { background: rgba(201,168,76,0.04); }
+  .bar-mini {
+    height: 4px;
+    background: var(--gold-dim);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  .bar-mini-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.5s ease; }
+
+  /* ANNOTATION */
+  .annotation {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.64rem;
+    color: var(--text-muted);
+    margin-top: 0.8rem;
+    padding-top: 0.8rem;
+    border-top: 1px dashed var(--border);
+  }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card, .kpi { animation: fadeUp 0.5s ease both; }
+  .kpi:nth-child(1) { animation-delay: 0.05s; }
+  .kpi:nth-child(2) { animation-delay: 0.1s; }
+  .kpi:nth-child(3) { animation-delay: 0.15s; }
+  .kpi:nth-child(4) { animation-delay: 0.2s; }
+
+  @media (max-width: 1100px) {
+    header { padding: 2rem 1.5rem 1.5rem; }
+    header h1 { font-size: 1.8rem; }
+    main { padding: 1.5rem 1.5rem 3rem; }
+    .filters { padding: 0.8rem 1.5rem; }
+    .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+    .grid-2, .grid-3, .grid-2-1, .grid-1-2 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .kpi-strip { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.5rem; }
+    .header-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="eyebrow">INPS · Istituto Nazionale Previdenza Sociale</div>
+    <h1>Osservatorio <em>Pensioni</em></h1>
+    <p>Analisi interattiva delle nuove pensioni liquidate per anno, territorio, categoria e fascia di importo</p>
+  </div>
+  <div class="header-badge">Dataset 6002 · 2020–2024</div>
+</header>
+
+<div class="filters">
+  <div class="filter-group">
+    <span class="filter-label">Anno</span>
+    <select id="f-anno">
+      <option value="all">Tutti gli anni</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Sesso</span>
+    <select id="f-sesso">
+      <option value="all">Maschi + Femmine</option>
+      <option value="Maschi">Solo Maschi</option>
+      <option value="Femmine">Solo Femmine</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Area</span>
+    <select id="f-area">
+      <option value="all">Tutte le aree</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Categoria</span>
+    <select id="f-cat">
+      <option value="all">Tutte le categorie</option>
+    </select>
+  </div>
+  <button class="reset-btn" onclick="resetFilters()">↺ Reset</button>
+</div>
+
+<main>
+  <!-- KPI STRIP -->
+  <div class="kpi-strip">
+    <div class="kpi">
+      <div class="kpi-label">Pensioni totali</div>
+      <div class="kpi-value" id="kpi-total">—</div>
+      <div class="kpi-sub">nel periodo selezionato</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Anno con più pensioni</div>
+      <div class="kpi-value" id="kpi-top-year">—</div>
+      <div class="kpi-sub" id="kpi-top-year-sub">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Regione più attiva</div>
+      <div class="kpi-value" id="kpi-top-reg" style="font-size:1.3rem">—</div>
+      <div class="kpi-sub" id="kpi-top-reg-sub">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Categoria prevalente</div>
+      <div class="kpi-value" id="kpi-top-cat" style="font-size:1.3rem">—</div>
+      <div class="kpi-sub" id="kpi-top-cat-sub">—</div>
+    </div>
+  </div>
+
+  <!-- GENDER BAR -->
+  <div class="card" style="margin-bottom:1.2rem; padding: 1.2rem 1.6rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+      <span class="card-subtitle" style="margin:0">Distribuzione di genere</span>
+      <div class="gender-legend">
+        <span><span class="dot" style="background:var(--blue)"></span> Maschi <strong id="pct-maschi" style="color:var(--text)">—%</strong></span>
+        <span><span class="dot" style="background:var(--rose)"></span> Femmine <strong id="pct-femmine" style="color:var(--text)">—%</strong></span>
+      </div>
+    </div>
+    <div class="gender-visual">
+      <div class="male" id="bar-maschi" style="width:50%"></div>
+      <div class="female" id="bar-femmine" style="width:50%"></div>
+    </div>
+  </div>
+
+  <!-- TREND -->
+  <div class="section-divider"><span>Andamento temporale</span></div>
+  <div class="card" style="margin-bottom:1.2rem;">
+    <div class="card-title">Nuove pensioni liquidate per trimestre</div>
+    <div class="card-subtitle">Evoluzione 2020–2024 · valori trimestrali</div>
+    <canvas id="chart-trend" height="110"></canvas>
+  </div>
+
+  <!-- REGIONI + CATEGORIA -->
+  <div class="section-divider"><span>Distribuzione geografica e per categoria</span></div>
+  <div class="grid-2-1">
+    <div class="card">
+      <div class="card-title">Pensioni per regione</div>
+      <div class="card-subtitle">Ordinate per volume · seleziona anno e filtri</div>
+      <canvas id="chart-regione" height="260"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Tipologia di pensione</div>
+      <div class="card-subtitle">Quota per categoria</div>
+      <canvas id="chart-cat" height="220"></canvas>
+      <div id="cat-legend" style="margin-top:0.8rem;"></div>
+    </div>
+  </div>
+
+  <!-- IMPORTO + ETÀ -->
+  <div class="section-divider"><span>Classi di importo e di età</span></div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Distribuzione per fascia di importo</div>
+      <div class="card-subtitle">Importo mensile in euro</div>
+      <canvas id="chart-importo" height="180"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Distribuzione per classe di età</div>
+      <div class="card-subtitle">Età al momento della liquidazione</div>
+      <canvas id="chart-eta" height="180"></canvas>
+    </div>
+  </div>
+
+  <!-- GESTIONE + AREA GEO -->
+  <div class="section-divider"><span>Tipo di gestione e area geografica</span></div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Tipo di gestione previdenziale</div>
+      <div class="card-subtitle">Quota per macro-categoria gestionale</div>
+      <canvas id="chart-gestione" height="180"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Area geografica</div>
+      <div class="card-subtitle">Nord Ovest · Nord Est · Centro · Sud e Isole</div>
+      <canvas id="chart-area" height="180"></canvas>
+    </div>
+  </div>
+
+  <!-- SESSO x CATEGORIA -->
+  <div class="section-divider"><span>Analisi per genere</span></div>
+  <div class="card" style="margin-bottom:1.2rem;">
+    <div class="card-title">Pensioni per categoria e genere</div>
+    <div class="card-subtitle">Confronto Maschi vs. Femmine per tipo di pensione</div>
+    <canvas id="chart-sesso-cat" height="100"></canvas>
+  </div>
+
+  <!-- TABELLA REGIONI -->
+  <div class="section-divider"><span>Dettaglio regionale</span></div>
+  <div class="card">
+    <div class="card-title">Riepilogo per regione</div>
+    <div class="card-subtitle">Con variazione rispetto all'anno precedente</div>
+    <div class="table-scroll">
+      <table id="table-regioni">
+        <thead>
+          <tr>
+            <th>Regione</th>
+            <th>Area geografica</th>
+            <th>Pensioni (selezione)</th>
+            <th>% sul totale</th>
+            <th>Volume relativo</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    <div class="annotation">* I valori riflettono i filtri correntemente selezionati · fonte: INPS Open Data · Dataset 6002</div>
+  </div>
+</main>
+
+<footer>
+  <span>Fonte: INPS Open Data · Dataset 6002 · Nuove pensioni liquidate 2020–2024</span>
+  <span>Aggiornato: 2025 · Visualizzazione dati</span>
+</footer>
+
+<script>
+const DATA = {"trend": [{"Anno_decorrenza": 2020, "Trimestrale": "I trimestre", "Numero_pensioni": 228427.0}, {"Anno_decorrenza": 2020, "Trimestrale": "II trimestre", "Numero_pensioni": 203948.0}, {"Anno_decorrenza": 2020, "Trimestrale": "III trimestre", "Numero_pensioni": 235791.0}, {"Anno_decorrenza": 2020, "Trimestrale": "IV trimestre", "Numero_pensioni": 221135.0}, {"Anno_decorrenza": 2021, "Trimestrale": "I trimestre", "Numero_pensioni": 233357.0}, {"Anno_decorrenza": 2021, "Trimestrale": "II trimestre", "Numero_pensioni": 217163.0}, {"Anno_decorrenza": 2021, "Trimestrale": "III trimestre", "Numero_pensioni": 243255.0}, {"Anno_decorrenza": 2021, "Trimestrale": "IV trimestre", "Numero_pensioni": 215526.0}, {"Anno_decorrenza": 2022, "Trimestrale": "I trimestre", "Numero_pensioni": 243224.0}, {"Anno_decorrenza": 2022, "Trimestrale": "II trimestre", "Numero_pensioni": 209701.0}, {"Anno_decorrenza": 2022, "Trimestrale": "III trimestre", "Numero_pensioni": 223853.0}, {"Anno_decorrenza": 2022, "Trimestrale": "IV trimestre", "Numero_pensioni": 199024.0}, {"Anno_decorrenza": 2023, "Trimestrale": "I trimestre", "Numero_pensioni": 223301.0}, {"Anno_decorrenza": 2023, "Trimestrale": "II trimestre", "Numero_pensioni": 198894.0}, {"Anno_decorrenza": 2023, "Trimestrale": "III trimestre", "Numero_pensioni": 211084.0}, {"Anno_decorrenza": 2023, "Trimestrale": "IV trimestre", "Numero_pensioni": 185957.0}, {"Anno_decorrenza": 2024, "Trimestrale": "I trimestre", "Numero_pensioni": 187223.0}], "regione": [{"Regione": "Abruzzo", "Anno_decorrenza": 2020, "Numero_pensioni": 20499.0}, {"Regione": "Abruzzo", "Anno_decorrenza": 2021, "Numero_pensioni": 20698.0}, {"Regione": "Abruzzo", "Anno_decorrenza": 2022, "Numero_pensioni": 19538.0}, {"Regione": "Abruzzo", "Anno_decorrenza": 2023, "Numero_pensioni": 17861.0}, {"Regione": "Abruzzo", "Anno_decorrenza": 2024, "Numero_pensioni": 4053.0}, {"Regione": "Basilicata", "Anno_decorrenza": 2020, "Numero_pensioni": 8791.0}, {"Regione": "Basilicata", "Anno_decorrenza": 2021, "Numero_pensioni": 9030.0}, {"Regione": "Basilicata", "Anno_decorrenza": 2022, "Numero_pensioni": 8967.0}, {"Regione": "Basilicata", "Anno_decorrenza": 2023, "Numero_pensioni": 8224.0}, {"Regione": "Basilicata", "Anno_decorrenza": 2024, "Numero_pensioni": 1790.0}, {"Regione": "Calabria", "Anno_decorrenza": 2020, "Numero_pensioni": 31078.0}, {"Regione": "Calabria", "Anno_decorrenza": 2021, "Numero_pensioni": 31329.0}, {"Regione": "Calabria", "Anno_decorrenza": 2022, "Numero_pensioni": 29849.0}, {"Regione": "Calabria", "Anno_decorrenza": 2023, "Numero_pensioni": 27043.0}, {"Regione": "Calabria", "Anno_decorrenza": 2024, "Numero_pensioni": 5926.0}, {"Regione": "Campania", "Anno_decorrenza": 2020, "Numero_pensioni": 72312.0}, {"Regione": "Campania", "Anno_decorrenza": 2021, "Numero_pensioni": 75275.0}, {"Regione": "Campania", "Anno_decorrenza": 2022, "Numero_pensioni": 72356.0}, {"Regione": "Campania", "Anno_decorrenza": 2023, "Numero_pensioni": 66515.0}, {"Regione": "Campania", "Anno_decorrenza": 2024, "Numero_pensioni": 14305.0}, {"Regione": "Emilia Romagna", "Anno_decorrenza": 2020, "Numero_pensioni": 71748.0}, {"Regione": "Emilia Romagna", "Anno_decorrenza": 2021, "Numero_pensioni": 72909.0}, {"Regione": "Emilia Romagna", "Anno_decorrenza": 2022, "Numero_pensioni": 70502.0}, {"Regione": "Emilia Romagna", "Anno_decorrenza": 2023, "Numero_pensioni": 67334.0}, {"Regione": "Emilia Romagna", "Anno_decorrenza": 2024, "Numero_pensioni": 15123.0}, {"Regione": "Friuli Venezia Giulia", "Anno_decorrenza": 2020, "Numero_pensioni": 19569.0}, {"Regione": "Friuli Venezia Giulia", "Anno_decorrenza": 2021, "Numero_pensioni": 20634.0}, {"Regione": "Friuli Venezia Giulia", "Anno_decorrenza": 2022, "Numero_pensioni": 19005.0}, {"Regione": "Friuli Venezia Giulia", "Anno_decorrenza": 2023, "Numero_pensioni": 17956.0}, {"Regione": "Friuli Venezia Giulia", "Anno_decorrenza": 2024, "Numero_pensioni": 4134.0}, {"Regione": "Lazio", "Anno_decorrenza": 2020, "Numero_pensioni": 74868.0}, {"Regione": "Lazio", "Anno_decorrenza": 2021, "Numero_pensioni": 77533.0}, {"Regione": "Lazio", "Anno_decorrenza": 2022, "Numero_pensioni": 74825.0}, {"Regione": "Lazio", "Anno_decorrenza": 2023, "Numero_pensioni": 69821.0}, {"Regione": "Lazio", "Anno_decorrenza": 2024, "Numero_pensioni": 15397.0}, {"Regione": "Liguria", "Anno_decorrenza": 2020, "Numero_pensioni": 25545.0}, {"Regione": "Liguria", "Anno_decorrenza": 2021, "Numero_pensioni": 25218.0}, {"Regione": "Liguria", "Anno_decorrenza": 2022, "Numero_pensioni": 24498.0}, {"Regione": "Liguria", "Anno_decorrenza": 2023, "Numero_pensioni": 22936.0}, {"Regione": "Liguria", "Anno_decorrenza": 2024, "Numero_pensioni": 5217.0}, {"Regione": "Lombardia", "Anno_decorrenza": 2020, "Numero_pensioni": 154352.0}, {"Regione": "Lombardia", "Anno_decorrenza": 2021, "Numero_pensioni": 150485.0}, {"Regione": "Lombardia", "Anno_decorrenza": 2022, "Numero_pensioni": 146834.0}, {"Regione": "Lombardia", "Anno_decorrenza": 2023, "Numero_pensioni": 138821.0}, {"Regione": "Lombardia", "Anno_decorrenza": 2024, "Numero_pensioni": 33368.0}, {"Regione": "Marche", "Anno_decorrenza": 2020, "Numero_pensioni": 25812.0}, {"Regione": "Marche", "Anno_decorrenza": 2021, "Numero_pensioni": 26691.0}, {"Regione": "Marche", "Anno_decorrenza": 2022, "Numero_pensioni": 25641.0}, {"Regione": "Marche", "Anno_decorrenza": 2023, "Numero_pensioni": 23211.0}, {"Regione": "Marche", "Anno_decorrenza": 2024, "Numero_pensioni": 5147.0}, {"Regione": "Molise", "Anno_decorrenza": 2020, "Numero_pensioni": 5273.0}, {"Regione": "Molise", "Anno_decorrenza": 2021, "Numero_pensioni": 5551.0}, {"Regione": "Molise", "Anno_decorrenza": 2022, "Numero_pensioni": 5358.0}, {"Regione": "Molise", "Anno_decorrenza": 2023, "Numero_pensioni": 4762.0}, {"Regione": "Molise", "Anno_decorrenza": 2024, "Numero_pensioni": 942.0}, {"Regione": "Piemonte e Valle d'Aosta", "Anno_decorrenza": 2020, "Numero_pensioni": 70984.0}, {"Regione": "Piemonte e Valle d'Aosta", "Anno_decorrenza": 2021, "Numero_pensioni": 71454.0}, {"Regione": "Piemonte e Valle d'Aosta", "Anno_decorrenza": 2022, "Numero_pensioni": 68669.0}, {"Regione": "Piemonte e Valle d'Aosta", "Anno_decorrenza": 2023, "Numero_pensioni": 62769.0}, {"Regione": "Piemonte e Valle d'Aosta", "Anno_decorrenza": 2024, "Numero_pensioni": 14684.0}, {"Regione": "Puglia", "Anno_decorrenza": 2020, "Numero_pensioni": 59958.0}, {"Regione": "Puglia", "Anno_decorrenza": 2021, "Numero_pensioni": 62253.0}, {"Regione": "Puglia", "Anno_decorrenza": 2022, "Numero_pensioni": 59235.0}, {"Regione": "Puglia", "Anno_decorrenza": 2023, "Numero_pensioni": 54050.0}, {"Regione": "Puglia", "Anno_decorrenza": 2024, "Numero_pensioni": 12194.0}, {"Regione": "Sardegna", "Anno_decorrenza": 2020, "Numero_pensioni": 23185.0}, {"Regione": "Sardegna", "Anno_decorrenza": 2021, "Numero_pensioni": 23582.0}, {"Regione": "Sardegna", "Anno_decorrenza": 2022, "Numero_pensioni": 22582.0}, {"Regione": "Sardegna", "Anno_decorrenza": 2023, "Numero_pensioni": 21042.0}, {"Regione": "Sardegna", "Anno_decorrenza": 2024, "Numero_pensioni": 4635.0}, {"Regione": "Sicilia", "Anno_decorrenza": 2020, "Numero_pensioni": 64189.0}, {"Regione": "Sicilia", "Anno_decorrenza": 2021, "Numero_pensioni": 67820.0}, {"Regione": "Sicilia", "Anno_decorrenza": 2022, "Numero_pensioni": 63926.0}, {"Regione": "Sicilia", "Anno_decorrenza": 2023, "Numero_pensioni": 60028.0}, {"Regione": "Sicilia", "Anno_decorrenza": 2024, "Numero_pensioni": 14243.0}, {"Regione": "Toscana", "Anno_decorrenza": 2020, "Numero_pensioni": 55676.0}, {"Regione": "Toscana", "Anno_decorrenza": 2021, "Numero_pensioni": 57014.0}, {"Regione": "Toscana", "Anno_decorrenza": 2022, "Numero_pensioni": 55590.0}, {"Regione": "Toscana", "Anno_decorrenza": 2023, "Numero_pensioni": 53102.0}, {"Regione": "Toscana", "Anno_decorrenza": 2024, "Numero_pensioni": 12841.0}, {"Regione": "Trentino Alto Adige", "Anno_decorrenza": 2020, "Numero_pensioni": 16226.0}, {"Regione": "Trentino Alto Adige", "Anno_decorrenza": 2021, "Numero_pensioni": 16800.0}, {"Regione": "Trentino Alto Adige", "Anno_decorrenza": 2022, "Numero_pensioni": 16675.0}, {"Regione": "Trentino Alto Adige", "Anno_decorrenza": 2023, "Numero_pensioni": 15242.0}, {"Regione": "Trentino Alto Adige", "Anno_decorrenza": 2024, "Numero_pensioni": 3204.0}, {"Regione": "Umbria", "Anno_decorrenza": 2020, "Numero_pensioni": 17490.0}, {"Regione": "Umbria", "Anno_decorrenza": 2021, "Numero_pensioni": 19347.0}, {"Regione": "Umbria", "Anno_decorrenza": 2022, "Numero_pensioni": 18273.0}, {"Regione": "Umbria", "Anno_decorrenza": 2023, "Numero_pensioni": 17888.0}, {"Regione": "Umbria", "Anno_decorrenza": 2024, "Numero_pensioni": 3402.0}, {"Regione": "Veneto", "Anno_decorrenza": 2020, "Numero_pensioni": 71746.0}, {"Regione": "Veneto", "Anno_decorrenza": 2021, "Numero_pensioni": 75678.0}, {"Regione": "Veneto", "Anno_decorrenza": 2022, "Numero_pensioni": 73479.0}, {"Regione": "Veneto", "Anno_decorrenza": 2023, "Numero_pensioni": 70631.0}, {"Regione": "Veneto", "Anno_decorrenza": 2024, "Numero_pensioni": 16618.0}], "categoria": [{"Categoria": "Anticipata", "Anno_decorrenza": 2020, "Numero_pensioni": 299965.0}, {"Categoria": "Anticipata", "Anno_decorrenza": 2021, "Numero_pensioni": 297741.0}, {"Categoria": "Anticipata", "Anno_decorrenza": 2022, "Numero_pensioni": 260417.0}, {"Categoria": "Anticipata", "Anno_decorrenza": 2023, "Numero_pensioni": 227639.0}, {"Categoria": "Anticipata", "Anno_decorrenza": 2024, "Numero_pensioni": 56660.0}, {"Categoria": "Invalidita'", "Anno_decorrenza": 2020, "Numero_pensioni": 48710.0}, {"Categoria": "Invalidita'", "Anno_decorrenza": 2021, "Numero_pensioni": 55394.0}, {"Categoria": "Invalidita'", "Anno_decorrenza": 2022, "Numero_pensioni": 54998.0}, {"Categoria": "Invalidita'", "Anno_decorrenza": 2023, "Numero_pensioni": 54513.0}, {"Categoria": "Invalidita'", "Anno_decorrenza": 2024, "Numero_pensioni": 8756.0}, {"Categoria": "Superstiti", "Anno_decorrenza": 2020, "Numero_pensioni": 259417.0}, {"Categoria": "Superstiti", "Anno_decorrenza": 2021, "Numero_pensioni": 258180.0}, {"Categoria": "Superstiti", "Anno_decorrenza": 2022, "Numero_pensioni": 249620.0}, {"Categoria": "Superstiti", "Anno_decorrenza": 2023, "Numero_pensioni": 224206.0}, {"Categoria": "Superstiti", "Anno_decorrenza": 2024, "Numero_pensioni": 48978.0}, {"Categoria": "Vecchiaia", "Anno_decorrenza": 2020, "Numero_pensioni": 281209.0}, {"Categoria": "Vecchiaia", "Anno_decorrenza": 2021, "Numero_pensioni": 297986.0}, {"Categoria": "Vecchiaia", "Anno_decorrenza": 2022, "Numero_pensioni": 310767.0}, {"Categoria": "Vecchiaia", "Anno_decorrenza": 2023, "Numero_pensioni": 312878.0}, {"Categoria": "Vecchiaia", "Anno_decorrenza": 2024, "Numero_pensioni": 72829.0}], "importo": [{"classe_importo": "1.000,00 - 1.499,99", "Anno_decorrenza": 2020, "Numero_pensioni": 133997.0}, {"classe_importo": "1.000,00 - 1.499,99", "Anno_decorrenza": 2021, "Numero_pensioni": 143606.0}, {"classe_importo": "1.000,00 - 1.499,99", "Anno_decorrenza": 2022, "Numero_pensioni": 141105.0}, {"classe_importo": "1.000,00 - 1.499,99", "Anno_decorrenza": 2023, "Numero_pensioni": 139558.0}, {"classe_importo": "1.000,00 - 1.499,99", "Anno_decorrenza": 2024, "Numero_pensioni": 32894.0}, {"classe_importo": "1.500,00 - 1.999,99", "Anno_decorrenza": 2020, "Numero_pensioni": 97739.0}, {"classe_importo": "1.500,00 - 1.999,99", "Anno_decorrenza": 2021, "Numero_pensioni": 98183.0}, {"classe_importo": "1.500,00 - 1.999,99", "Anno_decorrenza": 2022, "Numero_pensioni": 93204.0}, {"classe_importo": "1.500,00 - 1.999,99", "Anno_decorrenza": 2023, "Numero_pensioni": 94596.0}, {"classe_importo": "1.500,00 - 1.999,99", "Anno_decorrenza": 2024, "Numero_pensioni": 24208.0}, {"classe_importo": "2.000,00 - 2.999,99", "Anno_decorrenza": 2020, "Numero_pensioni": 137942.0}, {"classe_importo": "2.000,00 - 2.999,99", "Anno_decorrenza": 2021, "Numero_pensioni": 127532.0}, {"classe_importo": "2.000,00 - 2.999,99", "Anno_decorrenza": 2022, "Numero_pensioni": 103674.0}, {"classe_importo": "2.000,00 - 2.999,99", "Anno_decorrenza": 2023, "Numero_pensioni": 94219.0}, {"classe_importo": "2.000,00 - 2.999,99", "Anno_decorrenza": 2024, "Numero_pensioni": 20463.0}, {"classe_importo": "3.000,00 e piu'", "Anno_decorrenza": 2020, "Numero_pensioni": 52739.0}, {"classe_importo": "3.000,00 e piu'", "Anno_decorrenza": 2021, "Numero_pensioni": 47061.0}, {"classe_importo": "3.000,00 e piu'", "Anno_decorrenza": 2022, "Numero_pensioni": 43635.0}, {"classe_importo": "3.000,00 e piu'", "Anno_decorrenza": 2023, "Numero_pensioni": 41332.0}, {"classe_importo": "3.000,00 e piu'", "Anno_decorrenza": 2024, "Numero_pensioni": 9561.0}, {"classe_importo": "500,00 - 999,99", "Anno_decorrenza": 2020, "Numero_pensioni": 270298.0}, {"classe_importo": "500,00 - 999,99", "Anno_decorrenza": 2021, "Numero_pensioni": 289764.0}, {"classe_importo": "500,00 - 999,99", "Anno_decorrenza": 2022, "Numero_pensioni": 289244.0}, {"classe_importo": "500,00 - 999,99", "Anno_decorrenza": 2023, "Numero_pensioni": 286832.0}, {"classe_importo": "500,00 - 999,99", "Anno_decorrenza": 2024, "Numero_pensioni": 65188.0}, {"classe_importo": "Fino a 499,99", "Anno_decorrenza": 2020, "Numero_pensioni": 196586.0}, {"classe_importo": "Fino a 499,99", "Anno_decorrenza": 2021, "Numero_pensioni": 203155.0}, {"classe_importo": "Fino a 499,99", "Anno_decorrenza": 2022, "Numero_pensioni": 204940.0}, {"classe_importo": "Fino a 499,99", "Anno_decorrenza": 2023, "Numero_pensioni": 162699.0}, {"classe_importo": "Fino a 499,99", "Anno_decorrenza": 2024, "Numero_pensioni": 34909.0}], "eta": [{"classe_eta": "55 - 59", "Anno_decorrenza": 2020, "Numero_pensioni": 93290.0}, {"classe_eta": "55 - 59", "Anno_decorrenza": 2021, "Numero_pensioni": 96907.0}, {"classe_eta": "55 - 59", "Anno_decorrenza": 2022, "Numero_pensioni": 99064.0}, {"classe_eta": "55 - 59", "Anno_decorrenza": 2023, "Numero_pensioni": 87369.0}, {"classe_eta": "55 - 59", "Anno_decorrenza": 2024, "Numero_pensioni": 20805.0}, {"classe_eta": "60 - 64", "Anno_decorrenza": 2020, "Numero_pensioni": 229584.0}, {"classe_eta": "60 - 64", "Anno_decorrenza": 2021, "Numero_pensioni": 233704.0}, {"classe_eta": "60 - 64", "Anno_decorrenza": 2022, "Numero_pensioni": 196968.0}, {"classe_eta": "60 - 64", "Anno_decorrenza": 2023, "Numero_pensioni": 178306.0}, {"classe_eta": "60 - 64", "Anno_decorrenza": 2024, "Numero_pensioni": 42099.0}, {"classe_eta": "65 - 67", "Anno_decorrenza": 2020, "Numero_pensioni": 302156.0}, {"classe_eta": "65 - 67", "Anno_decorrenza": 2021, "Numero_pensioni": 309096.0}, {"classe_eta": "65 - 67", "Anno_decorrenza": 2022, "Numero_pensioni": 311558.0}, {"classe_eta": "65 - 67", "Anno_decorrenza": 2023, "Numero_pensioni": 301449.0}, {"classe_eta": "65 - 67", "Anno_decorrenza": 2024, "Numero_pensioni": 67422.0}, {"classe_eta": "68 e oltre", "Anno_decorrenza": 2020, "Numero_pensioni": 224088.0}, {"classe_eta": "68 e oltre", "Anno_decorrenza": 2021, "Numero_pensioni": 227453.0}, {"classe_eta": "68 e oltre", "Anno_decorrenza": 2022, "Numero_pensioni": 229547.0}, {"classe_eta": "68 e oltre", "Anno_decorrenza": 2023, "Numero_pensioni": 217597.0}, {"classe_eta": "68 e oltre", "Anno_decorrenza": 2024, "Numero_pensioni": 51239.0}, {"classe_eta": "Fino a 54", "Anno_decorrenza": 2020, "Numero_pensioni": 40183.0}, {"classe_eta": "Fino a 54", "Anno_decorrenza": 2021, "Numero_pensioni": 42141.0}, {"classe_eta": "Fino a 54", "Anno_decorrenza": 2022, "Numero_pensioni": 38665.0}, {"classe_eta": "Fino a 54", "Anno_decorrenza": 2023, "Numero_pensioni": 34515.0}, {"classe_eta": "Fino a 54", "Anno_decorrenza": 2024, "Numero_pensioni": 5658.0}], "sesso": [{"SESSO": "Femmine", "Anno_decorrenza": 2020, "Numero_pensioni": 487867.0}, {"SESSO": "Femmine", "Anno_decorrenza": 2021, "Numero_pensioni": 506750.0}, {"SESSO": "Femmine", "Anno_decorrenza": 2022, "Numero_pensioni": 490341.0}, {"SESSO": "Femmine", "Anno_decorrenza": 2023, "Numero_pensioni": 443910.0}, {"SESSO": "Femmine", "Anno_decorrenza": 2024, "Numero_pensioni": 97876.0}, {"SESSO": "Maschi", "Anno_decorrenza": 2020, "Numero_pensioni": 401434.0}, {"SESSO": "Maschi", "Anno_decorrenza": 2021, "Numero_pensioni": 402551.0}, {"SESSO": "Maschi", "Anno_decorrenza": 2022, "Numero_pensioni": 385461.0}, {"SESSO": "Maschi", "Anno_decorrenza": 2023, "Numero_pensioni": 375326.0}, {"SESSO": "Maschi", "Anno_decorrenza": 2024, "Numero_pensioni": 89347.0}], "area": [{"area_geografica": "Centro", "Anno_decorrenza": 2020, "Numero_pensioni": 173846.0}, {"area_geografica": "Centro", "Anno_decorrenza": 2021, "Numero_pensioni": 180585.0}, {"area_geografica": "Centro", "Anno_decorrenza": 2022, "Numero_pensioni": 174329.0}, {"area_geografica": "Centro", "Anno_decorrenza": 2023, "Numero_pensioni": 164022.0}, {"area_geografica": "Centro", "Anno_decorrenza": 2024, "Numero_pensioni": 36787.0}, {"area_geografica": "Nord Est", "Anno_decorrenza": 2020, "Numero_pensioni": 179289.0}, {"area_geografica": "Nord Est", "Anno_decorrenza": 2021, "Numero_pensioni": 186021.0}, {"area_geografica": "Nord Est", "Anno_decorrenza": 2022, "Numero_pensioni": 179661.0}, {"area_geografica": "Nord Est", "Anno_decorrenza": 2023, "Numero_pensioni": 171163.0}, {"area_geografica": "Nord Est", "Anno_decorrenza": 2024, "Numero_pensioni": 39079.0}, {"area_geografica": "Nord Ovest", "Anno_decorrenza": 2020, "Numero_pensioni": 250881.0}, {"area_geografica": "Nord Ovest", "Anno_decorrenza": 2021, "Numero_pensioni": 247157.0}, {"area_geografica": "Nord Ovest", "Anno_decorrenza": 2022, "Numero_pensioni": 240001.0}, {"area_geografica": "Nord Ovest", "Anno_decorrenza": 2023, "Numero_pensioni": 224526.0}, {"area_geografica": "Nord Ovest", "Anno_decorrenza": 2024, "Numero_pensioni": 53269.0}, {"area_geografica": "Sud e Isole", "Anno_decorrenza": 2020, "Numero_pensioni": 285285.0}, {"area_geografica": "Sud e Isole", "Anno_decorrenza": 2021, "Numero_pensioni": 295538.0}, {"area_geografica": "Sud e Isole", "Anno_decorrenza": 2022, "Numero_pensioni": 281811.0}, {"area_geografica": "Sud e Isole", "Anno_decorrenza": 2023, "Numero_pensioni": 259525.0}, {"area_geografica": "Sud e Isole", "Anno_decorrenza": 2024, "Numero_pensioni": 58088.0}], "gestione": [{"tgestio": "Assegni Sociali", "Anno_decorrenza": 2020, "Numero_pensioni": 74060.0}, {"tgestio": "Assegni Sociali", "Anno_decorrenza": 2021, "Numero_pensioni": 81007.0}, {"tgestio": "Assegni Sociali", "Anno_decorrenza": 2022, "Numero_pensioni": 88246.0}, {"tgestio": "Assegni Sociali", "Anno_decorrenza": 2023, "Numero_pensioni": 90189.0}, {"tgestio": "Assegni Sociali", "Anno_decorrenza": 2024, "Numero_pensioni": 24955.0}, {"tgestio": "Autonomi (compresi i Parasubordinati)", "Anno_decorrenza": 2020, "Numero_pensioni": 260731.0}, {"tgestio": "Autonomi (compresi i Parasubordinati)", "Anno_decorrenza": 2021, "Numero_pensioni": 264058.0}, {"tgestio": "Autonomi (compresi i Parasubordinati)", "Anno_decorrenza": 2022, "Numero_pensioni": 257947.0}, {"tgestio": "Autonomi (compresi i Parasubordinati)", "Anno_decorrenza": 2023, "Numero_pensioni": 248676.0}, {"tgestio": "Autonomi (compresi i Parasubordinati)", "Anno_decorrenza": 2024, "Numero_pensioni": 57332.0}, {"tgestio": "FPLD comprese le gestioni a contabilità separata", "Anno_decorrenza": 2020, "Numero_pensioni": 379128.0}, {"tgestio": "FPLD comprese le gestioni a contabilità separata", "Anno_decorrenza": 2021, "Numero_pensioni": 394694.0}, {"tgestio": "FPLD comprese le gestioni a contabilità separata", "Anno_decorrenza": 2022, "Numero_pensioni": 380631.0}, {"tgestio": "FPLD comprese le gestioni a contabilità separata", "Anno_decorrenza": 2023, "Numero_pensioni": 350948.0}, {"tgestio": "FPLD comprese le gestioni a contabilità separata", "Anno_decorrenza": 2024, "Numero_pensioni": 86031.0}, {"tgestio": "Gestione Dipendenti Pubblici", "Anno_decorrenza": 2020, "Numero_pensioni": 175382.0}, {"tgestio": "Gestione Dipendenti Pubblici", "Anno_decorrenza": 2021, "Numero_pensioni": 169542.0}, {"tgestio": "Gestione Dipendenti Pubblici", "Anno_decorrenza": 2022, "Numero_pensioni": 148978.0}, {"tgestio": "Gestione Dipendenti Pubblici", "Anno_decorrenza": 2023, "Numero_pensioni": 129423.0}, {"tgestio": "Gestione Dipendenti Pubblici", "Anno_decorrenza": 2024, "Numero_pensioni": 18905.0}], "sesso_cat": [{"SESSO": "Femmine", "Categoria": "Anticipata", "Anno_decorrenza": 2020, "Numero_pensioni": 118415.0}, {"SESSO": "Femmine", "Categoria": "Anticipata", "Anno_decorrenza": 2021, "Numero_pensioni": 122227.0}, {"SESSO": "Femmine", "Categoria": "Anticipata", "Anno_decorrenza": 2022, "Numero_pensioni": 107545.0}, {"SESSO": "Femmine", "Categoria": "Anticipata", "Anno_decorrenza": 2023, "Numero_pensioni": 79357.0}, {"SESSO": "Femmine", "Categoria": "Anticipata", "Anno_decorrenza": 2024, "Numero_pensioni": 16588.0}, {"SESSO": "Femmine", "Categoria": "Invalidita'", "Anno_decorrenza": 2020, "Numero_pensioni": 17029.0}, {"SESSO": "Femmine", "Categoria": "Invalidita'", "Anno_decorrenza": 2021, "Numero_pensioni": 20216.0}, {"SESSO": "Femmine", "Categoria": "Invalidita'", "Anno_decorrenza": 2022, "Numero_pensioni": 19581.0}, {"SESSO": "Femmine", "Categoria": "Invalidita'", "Anno_decorrenza": 2023, "Numero_pensioni": 19556.0}, {"SESSO": "Femmine", "Categoria": "Invalidita'", "Anno_decorrenza": 2024, "Numero_pensioni": 3243.0}, {"SESSO": "Femmine", "Categoria": "Superstiti", "Anno_decorrenza": 2020, "Numero_pensioni": 211098.0}, {"SESSO": "Femmine", "Categoria": "Superstiti", "Anno_decorrenza": 2021, "Numero_pensioni": 209273.0}, {"SESSO": "Femmine", "Categoria": "Superstiti", "Anno_decorrenza": 2022, "Numero_pensioni": 201630.0}, {"SESSO": "Femmine", "Categoria": "Superstiti", "Anno_decorrenza": 2023, "Numero_pensioni": 180912.0}, {"SESSO": "Femmine", "Categoria": "Superstiti", "Anno_decorrenza": 2024, "Numero_pensioni": 40469.0}, {"SESSO": "Femmine", "Categoria": "Vecchiaia", "Anno_decorrenza": 2020, "Numero_pensioni": 141325.0}, {"SESSO": "Femmine", "Categoria": "Vecchiaia", "Anno_decorrenza": 2021, "Numero_pensioni": 155034.0}, {"SESSO": "Femmine", "Categoria": "Vecchiaia", "Anno_decorrenza": 2022, "Numero_pensioni": 161585.0}, {"SESSO": "Femmine", "Categoria": "Vecchiaia", "Anno_decorrenza": 2023, "Numero_pensioni": 164085.0}, {"SESSO": "Femmine", "Categoria": "Vecchiaia", "Anno_decorrenza": 2024, "Numero_pensioni": 37576.0}, {"SESSO": "Maschi", "Categoria": "Anticipata", "Anno_decorrenza": 2020, "Numero_pensioni": 181550.0}, {"SESSO": "Maschi", "Categoria": "Anticipata", "Anno_decorrenza": 2021, "Numero_pensioni": 175514.0}, {"SESSO": "Maschi", "Categoria": "Anticipata", "Anno_decorrenza": 2022, "Numero_pensioni": 152872.0}, {"SESSO": "Maschi", "Categoria": "Anticipata", "Anno_decorrenza": 2023, "Numero_pensioni": 148282.0}, {"SESSO": "Maschi", "Categoria": "Anticipata", "Anno_decorrenza": 2024, "Numero_pensioni": 40072.0}, {"SESSO": "Maschi", "Categoria": "Invalidita'", "Anno_decorrenza": 2020, "Numero_pensioni": 31681.0}, {"SESSO": "Maschi", "Categoria": "Invalidita'", "Anno_decorrenza": 2021, "Numero_pensioni": 35178.0}, {"SESSO": "Maschi", "Categoria": "Invalidita'", "Anno_decorrenza": 2022, "Numero_pensioni": 35417.0}, {"SESSO": "Maschi", "Categoria": "Invalidita'", "Anno_decorrenza": 2023, "Numero_pensioni": 34957.0}, {"SESSO": "Maschi", "Categoria": "Invalidita'", "Anno_decorrenza": 2024, "Numero_pensioni": 5513.0}, {"SESSO": "Maschi", "Categoria": "Superstiti", "Anno_decorrenza": 2020, "Numero_pensioni": 48319.0}, {"SESSO": "Maschi", "Categoria": "Superstiti", "Anno_decorrenza": 2021, "Numero_pensioni": 48907.0}, {"SESSO": "Maschi", "Categoria": "Superstiti", "Anno_decorrenza": 2022, "Numero_pensioni": 47990.0}, {"SESSO": "Maschi", "Categoria": "Superstiti", "Anno_decorrenza": 2023, "Numero_pensioni": 43294.0}, {"SESSO": "Maschi", "Categoria": "Superstiti", "Anno_decorrenza": 2024, "Numero_pensioni": 8509.0}, {"SESSO": "Maschi", "Categoria": "Vecchiaia", "Anno_decorrenza": 2020, "Numero_pensioni": 139884.0}, {"SESSO": "Maschi", "Categoria": "Vecchiaia", "Anno_decorrenza": 2021, "Numero_pensioni": 142952.0}, {"SESSO": "Maschi", "Categoria": "Vecchiaia", "Anno_decorrenza": 2022, "Numero_pensioni": 149182.0}, {"SESSO": "Maschi", "Categoria": "Vecchiaia", "Anno_decorrenza": 2023, "Numero_pensioni": 148793.0}, {"SESSO": "Maschi", "Categoria": "Vecchiaia", "Anno_decorrenza": 2024, "Numero_pensioni": 35253.0}], "regione_area": [{"Regione": "Abruzzo", "area_geografica": "Sud e Isole", "Numero_pensioni": 82649.0}, {"Regione": "Basilicata", "area_geografica": "Sud e Isole", "Numero_pensioni": 36802.0}, {"Regione": "Calabria", "area_geografica": "Sud e Isole", "Numero_pensioni": 125225.0}, {"Regione": "Campania", "area_geografica": "Sud e Isole", "Numero_pensioni": 300763.0}, {"Regione": "Emilia Romagna", "area_geografica": "Nord Est", "Numero_pensioni": 297616.0}, {"Regione": "Friuli Venezia Giulia", "area_geografica": "Nord Est", "Numero_pensioni": 81298.0}, {"Regione": "Lazio", "area_geografica": "Centro", "Numero_pensioni": 312444.0}, {"Regione": "Liguria", "area_geografica": "Nord Ovest", "Numero_pensioni": 103414.0}, {"Regione": "Lombardia", "area_geografica": "Nord Ovest", "Numero_pensioni": 623860.0}, {"Regione": "Marche", "area_geografica": "Centro", "Numero_pensioni": 106502.0}, {"Regione": "Molise", "area_geografica": "Sud e Isole", "Numero_pensioni": 21886.0}, {"Regione": "Piemonte e Valle d'Aosta", "area_geografica": "Nord Ovest", "Numero_pensioni": 288560.0}, {"Regione": "Puglia", "area_geografica": "Sud e Isole", "Numero_pensioni": 247690.0}, {"Regione": "Sardegna", "area_geografica": "Sud e Isole", "Numero_pensioni": 95026.0}, {"Regione": "Sicilia", "area_geografica": "Sud e Isole", "Numero_pensioni": 270206.0}, {"Regione": "Toscana", "area_geografica": "Centro", "Numero_pensioni": 234223.0}, {"Regione": "Trentino Alto Adige", "area_geografica": "Nord Est", "Numero_pensioni": 68147.0}, {"Regione": "Umbria", "area_geografica": "Centro", "Numero_pensioni": 76400.0}, {"Regione": "Veneto", "area_geografica": "Nord Est", "Numero_pensioni": 308152.0}], "meta": {"anni": [2020, 2021, 2022, 2023, 2024], "trimestri": ["I trimestre", "II trimestre", "III trimestre", "IV trimestre"], "regioni": ["Abruzzo", "Basilicata", "Calabria", "Campania", "Emilia Romagna", "Friuli Venezia Giulia", "Lazio", "Liguria", "Lombardia", "Marche", "Molise", "Piemonte e Valle d'Aosta", "Puglia", "Sardegna", "Sicilia", "Toscana", "Trentino Alto Adige", "Umbria", "Veneto"], "categorie": ["Anticipata", "Invalidita'", "Superstiti", "Vecchiaia"], "importo_order": ["Fino a 499,99", "500,00 - 999,99", "1.000,00 - 1.499,99", "1.500,00 - 1.999,99", "2.000,00 - 2.999,99", "3.000,00 e piu'"], "eta_order": ["Fino a 54", "55 - 59", "60 - 64", "65 - 67", "68 e oltre"], "aree": ["Centro", "Nord Est", "Nord Ovest", "Sud e Isole"], "gestioni": ["Assegni Sociali", "Autonomi (compresi i Parasubordinati)", "FPLD comprese le gestioni a contabilità separata", "Gestione Dipendenti Pubblici"]}};
+
+// ──────────────────────────────────────────────────────────
+// Chart.js defaults
+Chart.defaults.color = '#8a8fa8';
+Chart.defaults.borderColor = '#252d45';
+Chart.defaults.font.family = 'DM Mono, monospace';
+Chart.defaults.font.size = 11;
+
+const GOLD = '#c9a84c';
+const GOLD_DIM = 'rgba(201,168,76,0.15)';
+const BLUE = '#5b8def';
+const ROSE = '#f7768e';
+const TEAL = '#4ecdc4';
+const LAVENDER = '#9d79d6';
+const RED = '#e05252';
+const GREEN = '#73daca';
+
+const CAT_COLORS = { "Vecchiaia": GOLD, "Anticipata": BLUE, "Invalidita'": ROSE, "Superstiti": TEAL };
+const AREA_COLORS = { "Nord Ovest": BLUE, "Nord Est": TEAL, "Centro": GOLD, "Sud e Isole": ROSE };
+const GESTIONE_COLORS = [GOLD, BLUE, TEAL, ROSE];
+
+// ──────────────────────────────────────────────────────────
+// Filter state
+let state = { anno: 'all', sesso: 'all', area: 'all', cat: 'all' };
+
+// Populate filters
+const anniSel = document.getElementById('f-anno');
+DATA.meta.anni.forEach(a => {
+  const o = document.createElement('option');
+  o.value = a; o.textContent = a;
+  anniSel.appendChild(o);
+});
+const areaSel = document.getElementById('f-area');
+DATA.meta.aree.forEach(a => {
+  const o = document.createElement('option');
+  o.value = a; o.textContent = a;
+  areaSel.appendChild(o);
+});
+const catSel = document.getElementById('f-cat');
+DATA.meta.categorie.forEach(c => {
+  const o = document.createElement('option');
+  o.value = c; o.textContent = c;
+  catSel.appendChild(o);
+});
+
+document.getElementById('f-anno').onchange = e => { state.anno = e.target.value; update(); };
+document.getElementById('f-sesso').onchange = e => { state.sesso = e.target.value; update(); };
+document.getElementById('f-area').onchange = e => { state.area = e.target.value; update(); };
+document.getElementById('f-cat').onchange = e => { state.cat = e.target.value; update(); };
+
+function resetFilters() {
+  state = { anno: 'all', sesso: 'all', area: 'all', cat: 'all' };
+  document.getElementById('f-anno').value = 'all';
+  document.getElementById('f-sesso').value = 'all';
+  document.getElementById('f-area').value = 'all';
+  document.getElementById('f-cat').value = 'all';
+  update();
+}
+
+// ──────────────────────────────────────────────────────────
+// Data helpers
+
+function fmt(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'k';
+  return n.toFixed(0);
+}
+function fmtFull(n) { return Math.round(n).toLocaleString('it-IT'); }
+
+// Filter raw sesso-cat data by state filters (except sesso itself for gender bar)
+function filterSessoCat(excludeSesso=false, excludeCat=false, excludeArea=false) {
+  return DATA.sesso_cat.filter(r => {
+    if (!excludeSesso && state.sesso !== 'all' && r.SESSO !== state.sesso) return false;
+    if (!excludeCat && state.cat !== 'all' && r.Categoria !== state.cat) return false;
+    if (state.anno !== 'all' && r.Anno_decorrenza != state.anno) return false;
+    // area filtering requires joining with regione data – skip here for simplicity
+    return true;
+  });
+}
+
+function sumBy(arr, keyFn, valField='Numero_pensioni') {
+  const m = {};
+  for (const r of arr) {
+    const k = keyFn(r);
+    m[k] = (m[k] || 0) + (r[valField] || 0);
+  }
+  return m;
+}
+
+// Apply filters to a dataset
+function applyFilters(dataset, fields) {
+  return dataset.filter(r => {
+    if (state.anno !== 'all' && fields.anno && r[fields.anno] != state.anno) return false;
+    if (state.sesso !== 'all' && fields.sesso && r[fields.sesso] !== state.sesso) return false;
+    if (state.area !== 'all' && fields.area && r[fields.area] !== state.area) return false;
+    if (state.cat !== 'all' && fields.cat && r[fields.cat] !== state.cat) return false;
+    return true;
+  });
+}
+
+// ──────────────────────────────────────────────────────────
+// Charts
+let charts = {};
+
+function makeChart(id, type, data, opts={}) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id).getContext('2d');
+  charts[id] = new Chart(ctx, {
+    type,
+    data,
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      animation: { duration: 600, easing: 'easeInOutQuart' },
+      plugins: {
+        legend: { display: opts.legend !== undefined ? opts.legend : false },
+        tooltip: {
+          backgroundColor: '#131829',
+          borderColor: '#252d45',
+          borderWidth: 1,
+          titleColor: '#c9a84c',
+          bodyColor: '#e8e4d8',
+          padding: 10,
+          callbacks: opts.tooltipCb || {}
+        }
+      },
+      scales: opts.scales || {},
+      ...opts.extra
+    }
+  });
+}
+
+// ──────────────────────────────────────────────────────────
+// UPDATE
+
+function update() {
+  updateKPIs();
+  updateGenderBar();
+  updateTrend();
+  updateRegione();
+  updateCategoria();
+  updateImporto();
+  updateEta();
+  updateGestione();
+  updateArea();
+  updateSessoCat();
+  updateTable();
+}
+
+// KPIs
+function updateKPIs() {
+  // Total from sesso_cat filtered
+  const sc = filterSessoCat();
+  const total = sc.reduce((s, r) => s + r.Numero_pensioni, 0);
+  document.getElementById('kpi-total').textContent = fmtFull(total);
+
+  // Best year (from trend filtered by sesso+cat)
+  const byYear = {};
+  filterSessoCat().forEach(r => {
+    byYear[r.Anno_decorrenza] = (byYear[r.Anno_decorrenza] || 0) + r.Numero_pensioni;
+  });
+  const topYear = Object.entries(byYear).sort((a,b) => b[1]-a[1])[0];
+  if (topYear) {
+    document.getElementById('kpi-top-year').textContent = topYear[0];
+    document.getElementById('kpi-top-year-sub').textContent = fmtFull(topYear[1]) + ' pensioni';
+  }
+
+  // Best region
+  const regFiltered = applyFilters(DATA.regione, { anno: 'Anno_decorrenza' });
+  const byReg = sumBy(regFiltered, r => r.Regione);
+  const topReg = Object.entries(byReg).sort((a,b) => b[1]-a[1])[0];
+  if (topReg) {
+    document.getElementById('kpi-top-reg').textContent = topReg[0];
+    document.getElementById('kpi-top-reg-sub').textContent = fmtFull(topReg[1]) + ' pensioni';
+  }
+
+  // Best category
+  const byCat = sumBy(filterSessoCat(), r => r.Categoria);
+  const topCat = Object.entries(byCat).sort((a,b) => b[1]-a[1])[0];
+  if (topCat) {
+    document.getElementById('kpi-top-cat').textContent = topCat[0];
+    document.getElementById('kpi-top-cat-sub').textContent = fmt(topCat[1]) + ' · ' + Math.round(topCat[1]/total*100) + '%';
+  }
+}
+
+// Gender bar
+function updateGenderBar() {
+  const sc = filterSessoCat(true); // exclude sesso filter
+  const byS = sumBy(sc, r => r.SESSO);
+  const m = byS['Maschi'] || 0;
+  const f = byS['Femmine'] || 0;
+  const tot = m + f;
+  const pm = tot ? Math.round(m/tot*100) : 50;
+  const pf = 100 - pm;
+  document.getElementById('bar-maschi').style.width = pm + '%';
+  document.getElementById('bar-femmine').style.width = pf + '%';
+  document.getElementById('pct-maschi').textContent = pm + '%';
+  document.getElementById('pct-femmine').textContent = pf + '%';
+}
+
+// Trend
+function updateTrend() {
+  const quarterOrder = ['I trimestre','II trimestre','III trimestre','IV trimestre'];
+  const anni = DATA.meta.anni;
+  const labels = [];
+  anni.forEach(a => quarterOrder.forEach(q => labels.push(`${q.split(' ')[0]} ${a}`)));
+
+  // We aggregate sesso_cat by Anno+Trimestre via trend data
+  // trend has Anno+Trimestrale but no sesso/cat breakdown → use it if no sesso/cat filter
+  // otherwise fall back to sesso data (approximation)
+  let pointsMap = {};
+  if (state.sesso === 'all' && state.cat === 'all') {
+    DATA.trend.forEach(r => {
+      if (state.anno !== 'all' && r.Anno_decorrenza != state.anno) return;
+      const k = `${r.Trimestrale}_${r.Anno_decorrenza}`;
+      pointsMap[k] = (pointsMap[k] || 0) + r.Numero_pensioni;
+    });
+  } else {
+    // Approximate: use sesso + distribute evenly across quarters (best we can with available aggregations)
+    // Use sesso data per anno, divide by 4
+    const filtSesso = applyFilters(DATA.sesso, { anno: 'Anno_decorrenza', sesso: 'SESSO' });
+    const byAnno = sumBy(filtSesso, r => r.Anno_decorrenza);
+    quarterOrder.forEach(q => {
+      Object.entries(byAnno).forEach(([a, v]) => {
+        const k = `${q}_${a}`;
+        pointsMap[k] = (v / 4);
+      });
+    });
+  }
+
+  const points = [];
+  anni.forEach(a => quarterOrder.forEach(q => {
+    if (state.anno !== 'all' && a != state.anno) return;
+    points.push({ label: `${q.split(' ')[0]} ${a}`, v: pointsMap[`${q}_${a}`] || 0 });
+  }));
+
+  makeChart('chart-trend', 'line', {
+    labels: points.map(p => p.label),
+    datasets: [{
+      data: points.map(p => p.v),
+      borderColor: GOLD,
+      backgroundColor: 'rgba(201,168,76,0.08)',
+      fill: true,
+      tension: 0.4,
+      pointRadius: 3,
+      pointBackgroundColor: GOLD,
+      borderWidth: 2,
+    }]
+  }, {
+    scales: {
+      x: { grid: { color: 'rgba(37,45,69,0.5)' }, ticks: { maxRotation: 45, font: { size: 9 } } },
+      y: { grid: { color: 'rgba(37,45,69,0.5)' }, ticks: { callback: v => fmt(v) } }
+    },
+    tooltipCb: { label: ctx => ' ' + fmtFull(ctx.raw) + ' pensioni' }
+  });
+}
+
+// Regione
+function updateRegione() {
+  const filtered = applyFilters(DATA.regione, { anno: 'Anno_decorrenza' });
+  const byReg = sumBy(filtered, r => r.Regione);
+  const sorted = Object.entries(byReg).sort((a,b) => b[1]-a[1]);
+  makeChart('chart-regione', 'bar', {
+    labels: sorted.map(r => r[0]),
+    datasets: [{
+      data: sorted.map(r => r[1]),
+      backgroundColor: sorted.map((_, i) => i === 0 ? GOLD : 'rgba(201,168,76,0.25)'),
+      borderColor: 'transparent',
+      borderRadius: 2,
+    }]
+  }, {
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 40 } },
+      y: { grid: { color: 'rgba(37,45,69,0.5)' }, ticks: { callback: v => fmt(v) } }
+    },
+    tooltipCb: { label: ctx => ' ' + fmtFull(ctx.raw) + ' pensioni' }
+  });
+}
+
+// Categoria donut
+function updateCategoria() {
+  const filtered = applyFilters(DATA.categoria, { anno: 'Anno_decorrenza' });
+  const byCat = sumBy(filtered, r => r.Categoria);
+  const labels = DATA.meta.categorie;
+  const vals = labels.map(l => byCat[l] || 0);
+  const colors = labels.map(l => CAT_COLORS[l] || GOLD);
+
+  makeChart('chart-cat', 'doughnut', {
+    labels,
+    datasets: [{ data: vals, backgroundColor: colors, borderColor: '#181e30', borderWidth: 3, hoverOffset: 8 }]
+  }, {
+    extra: { cutout: '65%' },
+    legend: false,
+    tooltipCb: { label: ctx => ` ${ctx.label}: ${fmtFull(ctx.raw)}` }
+  });
+
+  // Custom legend
+  const tot = vals.reduce((s,v) => s+v, 0);
+  document.getElementById('cat-legend').innerHTML = labels.map((l,i) =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;font-size:0.75rem;">
+      <span style="display:flex;align-items:center;gap:0.5rem;color:var(--text-dim)">
+        <span style="width:10px;height:10px;border-radius:2px;background:${colors[i]};display:inline-block"></span>${l}
+      </span>
+      <span style="font-family:'DM Mono',monospace;color:var(--text)">${tot ? Math.round(vals[i]/tot*100) : 0}%</span>
+    </div>`
+  ).join('');
+}
+
+// Importo
+function updateImporto() {
+  const filtered = applyFilters(DATA.importo, { anno: 'Anno_decorrenza' });
+  const byI = sumBy(filtered, r => r.classe_importo);
+  const labels = DATA.meta.importo_order;
+  const vals = labels.map(l => byI[l] || 0);
+  makeChart('chart-importo', 'bar', {
+    labels: labels.map(l => l.replace("3.000,00 e piu'", "3.000+ €")),
+    datasets: [{
+      data: vals,
+      backgroundColor: vals.map((v, i) => {
+        const alpha = 0.3 + (i / (labels.length - 1)) * 0.7;
+        return `rgba(201,168,76,${alpha})`;
+      }),
+      borderColor: 'transparent',
+      borderRadius: 3,
+    }]
+  }, {
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 30 } },
+      y: { grid: { color: 'rgba(37,45,69,0.5)' }, ticks: { callback: v => fmt(v) } }
+    },
+    tooltipCb: { label: ctx => ' ' + fmtFull(ctx.raw) + ' pensioni' }
+  });
+}
+
+// Età
+function updateEta() {
+  const filtered = applyFilters(DATA.eta, { anno: 'Anno_decorrenza' });
+  const byE = sumBy(filtered, r => r.classe_eta);
+  const labels = DATA.meta.eta_order;
+  const vals = labels.map(l => byE[l] || 0);
+  makeChart('chart-eta', 'bar', {
+    labels,
+    datasets: [{
+      data: vals,
+      backgroundColor: [
+        'rgba(91,141,239,0.4)',
+        'rgba(91,141,239,0.55)',
+        'rgba(201,168,76,0.7)',
+        GOLD,
+        'rgba(201,168,76,0.5)',
+      ],
+      borderColor: 'transparent',
+      borderRadius: 3,
+    }]
+  }, {
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+      y: { grid: { color: 'rgba(37,45,69,0.5)' }, ticks: { callback: v => fmt(v) } }
+    },
+    tooltipCb: { label: ctx => ' ' + fmtFull(ctx.raw) + ' pensioni' }
+  });
+}
+
+// Gestione
+function updateGestione() {
+  const filtered = applyFilters(DATA.gestione, { anno: 'Anno_decorrenza' });
+  const byG = sumBy(filtered, r => r.tgestio);
+  const sorted = Object.entries(byG).sort((a,b) => b[1]-a[1]);
+  const shortLabels = sorted.map(([k]) =>
+    k.replace('FPLD comprese le gestioni a contabilità separata', 'FPLD')
+     .replace('Autonomi (compresi i Parasubordinati)', 'Autonomi')
+     .replace('Gestione Dipendenti Pubblici', 'Dip. Pubblici')
+     .replace('Assegni Sociali', 'Assegni Sociali')
+  );
+  makeChart('chart-gestione', 'doughnut', {
+    labels: shortLabels,
+    datasets: [{ data: sorted.map(r => r[1]), backgroundColor: GESTIONE_COLORS, borderColor: '#181e30', borderWidth: 3, hoverOffset: 8 }]
+  }, {
+    extra: { cutout: '60%' },
+    legend: true,
+    extra: { cutout: '60%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 10 } } } } }
+  });
+}
+
+// Area
+function updateArea() {
+  const filtered = applyFilters(DATA.area, { anno: 'Anno_decorrenza' });
+  const byA = sumBy(filtered, r => r.area_geografica);
+  const labels = DATA.meta.aree;
+  const vals = labels.map(l => byA[l] || 0);
+  const colors = labels.map(l => AREA_COLORS[l] || GOLD);
+  makeChart('chart-area', 'bar', {
+    labels,
+    datasets: [{
+      data: vals,
+      backgroundColor: colors.map(c => c + '99'),
+      borderColor: colors,
+      borderWidth: 1,
+      borderRadius: 3,
+    }]
+  }, {
+    scales: {
+      x: { grid: { display: false } },
+      y: { grid: { color: 'rgba(37,45,69,0.5)' }, ticks: { callback: v => fmt(v) } }
+    },
+    tooltipCb: { label: ctx => ' ' + fmtFull(ctx.raw) + ' pensioni' }
+  });
+}
+
+// Sesso x Categoria
+function updateSessoCat() {
+  const sc = filterSessoCat(false, true); // exclude cat filter for this chart
+  const cats = DATA.meta.categorie;
+  const maschi = cats.map(c => sc.filter(r => r.SESSO === 'Maschi' && r.Categoria === c).reduce((s,r) => s+r.Numero_pensioni, 0));
+  const femmine = cats.map(c => sc.filter(r => r.SESSO === 'Femmine' && r.Categoria === c).reduce((s,r) => s+r.Numero_pensioni, 0));
+
+  makeChart('chart-sesso-cat', 'bar', {
+    labels: cats,
+    datasets: [
+      { label: 'Maschi', data: maschi, backgroundColor: BLUE + 'aa', borderColor: BLUE, borderWidth: 1, borderRadius: 3 },
+      { label: 'Femmine', data: femmine, backgroundColor: ROSE + 'aa', borderColor: ROSE, borderWidth: 1, borderRadius: 3 }
+    ]
+  }, {
+    legend: true,
+    extra: { plugins: { legend: { labels: { boxWidth: 12, padding: 16, font: { size: 11 } } } } },
+    scales: {
+      x: { grid: { display: false } },
+      y: { grid: { color: 'rgba(37,45,69,0.5)' }, ticks: { callback: v => fmt(v) } }
+    },
+    tooltipCb: { label: ctx => ` ${ctx.dataset.label}: ${fmtFull(ctx.raw)}` }
+  });
+}
+
+// Table
+function updateTable() {
+  const regFiltered = applyFilters(DATA.regione, { anno: 'Anno_decorrenza' });
+  const byReg = sumBy(regFiltered, r => r.Regione);
+  const areaMap = {};
+  DATA.regione_area.forEach(r => areaMap[r.Regione] = r.area_geografica);
+  const sorted = Object.entries(byReg).sort((a,b) => b[1]-a[1]);
+  const total = sorted.reduce((s,[,v]) => s+v, 0);
+  const max = sorted[0]?.[1] || 1;
+
+  document.getElementById('table-body').innerHTML = sorted.map(([reg, val]) =>
+    `<tr>
+      <td style="font-weight:500">${reg}</td>
+      <td style="color:var(--text-dim);font-family:'DM Mono',monospace;font-size:0.7rem">${areaMap[reg] || '—'}</td>
+      <td style="font-family:'DM Mono',monospace">${fmtFull(val)}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--gold)">${total ? (val/total*100).toFixed(1) : 0}%</td>
+      <td style="width:150px"><div class="bar-mini"><div class="bar-mini-fill" style="width:${Math.round(val/max*100)}%"></div></div></td>
+    </tr>`
+  ).join('');
+}
+
+// Init
+update();
+</script>
+</body>
+</html>
